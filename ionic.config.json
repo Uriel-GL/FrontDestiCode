@@ -1,0 +1,7 @@
+{
+  "name": "FrontDestiCode",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "vue-vite"
+}
