@@ -30,8 +30,6 @@
 
             <ion-button expand="full" @click="registrarUsuario" class="custom-button">Registrate Aquí</ion-button>
 
-            <ion-toast v-model="mostrarToastError" message="Usuario o contraseña incorrectos." position="top"
-              color="danger" duration="5000"></ion-toast>
           </ion-list>
         </ion-card-content>
       </ion-card>

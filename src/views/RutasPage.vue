@@ -112,10 +112,10 @@ export default {
                     const data = await response.json();
                     this.unidades = data; // Almacena las unidades en la variable "unidades"
                 } else {
-                    console.error("Error al obtener las unidades");
+                    console.log("Error al obtener las unidades");
                 }
             } catch (error) {
-                console.error("Error de red:", error);
+                console.log("Error de red:", error);
             }
         },
         crearRuta() {

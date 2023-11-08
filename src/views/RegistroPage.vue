@@ -118,8 +118,6 @@
 
                         <ion-button expand="full" @click="submitForm2" class="custom-button">Registrar</ion-button>
 
-                        <ion-toast v-model="mostrarToastError" message="Por favor, complete todos los campos obligatorios."
-                            position="top" color="danger" duration="5000"></ion-toast>
                     </ion-list>
                 </ion-card-content>
             </ion-card>
@@ -219,7 +217,7 @@ export default {
                 // Después del registro, puedes redirigir al usuario a otra página, por ejemplo.
             } else {
                 alert("Error");
-                this.mostrarToastError = true;
+                
             }
         },
         validateSecondForm() {
