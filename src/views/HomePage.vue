@@ -1,5 +1,6 @@
 <template>
   <ion-page>
+
     <ion-header>
       <ion-toolbar>
         <ion-title>Iniciar Sesión</ion-title>
@@ -38,6 +39,7 @@
 </template>
 
 <script>
+
 import { IonInput, IonButton, IonToast, IonPage } from '@ionic/vue';
 import { ref } from 'vue';
 
@@ -98,7 +100,6 @@ ion-button {
 ion-item.rounded-item {
   border-radius: 10px;
   margin-bottom: 10px;
-}
 
 ion-label.custom-label {
   width: 40%;
