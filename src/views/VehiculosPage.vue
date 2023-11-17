@@ -30,12 +30,12 @@
 
                         <ion-item class="rounded-item">
                             <ion-label class="custom-label">Imagen del Vehículo</ion-label>
-                            <ion-input v-model="vehiculoImagen" type="file" @change="handleFileChange" accept="image/*"
-                                class="custom-file-input" required />
+                            <ion-input v-model="imagen" type="file" @change="handleFileChange" class="custom-file-input"
+                                required />
                         </ion-item>
 
                         <ion-item class="rounded-item">
-                            <ion-img :src="vehiculoImagenPreview" v-if="vehiculoImagenPreview"></ion-img>
+                            <ion-img :src="imagenPreview" v-if="imagenPreview"></ion-img>
                         </ion-item>
 
                         <ion-button expand="full" @click="submitForm" class="custom-button">Registrar Vehículo</ion-button>
@@ -76,24 +76,33 @@ export default {
     },
     data() {
         return {
-            idUnidad: '',
-            idUsuario: '',
+            id_Unidad: '',
+            id_Usuario: '724083E0-46F6-4B7D-8488-C83AA7219F1E',
             color: '',
             placa: '',
             modelo: '',
-            vehiculoImagen: null,
-            vehiculoImagenPreview: null,
+            imagen: null,
+            imagenPreview: null,
         };
     },
     methods: {
         handleFileChange(event) {
             const file = event.target.files[0];
             if (file) {
-                this.vehiculoImagen = file;
-                this.vehiculoImagenPreview = URL.createObjectURL(file);
+                if (file.type.startsWith('image/')) {
+                    this.imagen = file;
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    img.onload = () => {
+                        this.imagenPreview = img.src;
+                    };
+                } else {
+                    alert("El archivo seleccionado no es una imagen válida.");
+                    this.imagen = null;
+                }
             }
         },
-        submitForm() {
+        async submitForm() {
             let errorMessage = "";
 
             if (!this.color) {
@@ -108,7 +117,7 @@ export default {
                 errorMessage += "Por favor, ingrese el modelo del vehículo.\n";
             }
 
-            if (!this.vehiculoImagen) {
+            if (!this.imagen) {
                 errorMessage += "Por favor, seleccione una imagen del vehículo.\n";
             }
 
@@ -116,12 +125,82 @@ export default {
                 // Muestra el mensaje de error
                 alert("Error: \n" + errorMessage);
             } else {
-                // Aquí puedes enviar los datos del formulario, incluyendo la imagen del vehículo, a tu servidor o realizar otras acciones necesarias.
-                alert("Correcto");
-            }
+                const imagenBase64 = await this.getBase64Image();
 
-            // Aquí puedes enviar los datos del formulario, incluyendo la imagen del vehículo, a tu servidor o realizar otras acciones necesarias.
+                function generateGuid() {
+                    let d = Date.now();
+                    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+                        d += performance.now(); // Agregar tiempo de alta resolución si está disponible
+                    }
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        const r = (d + Math.random() * 16) % 16 | 0;
+                        d = Math.floor(d / 16);
+                        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+                    });
+                };
+
+                const nuevoVehiculo = {
+                    id_Unidad: generateGuid(), //this.id_Unidad,
+                    id_Usuario: this.id_Usuario,
+                    color: this.color,
+                    placa: this.placa,
+                    imagen: imagenBase64,
+                    modelo: this.modelo
+                };
+
+                const response = await fetch("https://localhost:7038/api/Vehiculos", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(nuevoVehiculo),
+                });
+
+                if (!response.ok) {
+                    alert("No se pudo registrar el vehiculo")
+                    return;
+                } else {
+                    alert("Registro Exitoso")
+                    // Después de un registro exitoso, restablece los valores a vacío
+                    this.color = '';
+                    this.placa = '';
+                    this.modelo = '';
+                    this.imagen = null;
+                    this.imagenPreview = null;
+                }
+                //alert("Correcto");
+            }
         },
+        async getBase64Image() {
+            return new Promise((resolve) => {
+                const image = new Image();
+                image.src = this.imagenPreview;
+                image.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    // Establecer el tamaño del canvas igual al tamaño de la imagen
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+
+                    // Dibujar la imagen en el canvas
+                    ctx.drawImage(image, 0, 0);
+
+                    // Obtener el base64 del canvas
+                    const dataURL = canvas.toDataURL("image/png"); // Puedes cambiar "image/png" según el formato deseado
+
+                    // Convertir a cadena Base64
+                    const base64 = this.getBase64StringFromDataURL(dataURL);
+                    resolve(base64);
+                };
+            });
+        },
+        getBase64StringFromDataURL(dataURL) {
+            return dataURL.replace('data:', '').replace(/^.+,/, '');
+        },
+
+
+
     },
 };
 </script>
@@ -195,5 +274,3 @@ ion-input.custom-input {
     border: 2px solid #034561;
 }
 </style>
-    
-  
