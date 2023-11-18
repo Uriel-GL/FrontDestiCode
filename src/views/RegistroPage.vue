@@ -2,7 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar>
-                <ion-title>Registro de Usuario</ion-title>
+                <ion-title>Registro de Usuarios</ion-title>
             </ion-toolbar>
         </ion-header>
         <ion-content class="ion-padding" v-if="!mostrarSegundoFormulario">
@@ -34,9 +34,11 @@
                         <ion-item class="rounded-item">
                             <ion-label class="custom-label">Confirmar Contraseña</ion-label>
                             <ion-input aria-label="Confirmar Contraseña" v-model="confirmarContrasenia" type="password"
-                                required class="custom-input-password custom-input-border-color-3"></ion-input>
-                            <ion-button slot="end" @click="togglePasswordVisibility" fill="clear" class="custom-eye-button">
-                                <ion-icon :icon="showPassword ? 'eye' : 'eye-off'"></ion-icon>
+                                required class="custom-input-password custom-input-border-color-3"
+                                ref="confirmarContraseniaInput"></ion-input>
+                            <ion-button slot="end" @click="togglePasswordVisibility2" fill="clear"
+                                class="custom-eye-button">
+                                <ion-icon :icon="showPassword2 ? 'eye' : 'eye-off'"></ion-icon>
                             </ion-button>
                         </ion-item>
 
@@ -217,7 +219,7 @@ export default {
                 // Después del registro, puedes redirigir al usuario a otra página, por ejemplo.
             } else {
                 alert("Error");
-                
+
             }
         },
         validateSecondForm() {
@@ -286,6 +288,14 @@ export default {
             const inputElement = this.$refs.contraseniaInput.$el.querySelector('input');
             if (inputElement) {
                 inputElement.type = this.showPassword ? 'text' : 'password';
+            }
+        },
+
+        togglePasswordVisibility2() {
+            this.showPassword2 = !this.showPassword2;
+            const inputElement = this.$refs.confirmarContraseniaInput.$el.querySelector('input');
+            if (inputElement) {
+                inputElement.type = this.showPassword2 ? 'text' : 'password';
             }
         },
     }
