@@ -30,7 +30,7 @@
 
                         <ion-item class="rounded-item">
                             <ion-label class="custom-label">Imagen del Vehículo</ion-label>
-                            <ion-input v-model="imagen" type="file" @change="handleFileChange" class="custom-file-input"
+                            <ion-input aria-label="Imagen" v-model="imagen" type="file" @change="handleFileChange" class="custom-file-input"
                                 required />
                         </ion-item>
 
@@ -189,18 +189,11 @@ export default {
                     // Obtener el base64 del canvas
                     const dataURL = canvas.toDataURL("image/png"); // Puedes cambiar "image/png" según el formato deseado
 
-                    // Convertir a cadena Base64
-                    const base64 = this.getBase64StringFromDataURL(dataURL);
-                    resolve(base64);
+                    console.log(dataURL);
+                    resolve(dataURL);
                 };
             });
         },
-        getBase64StringFromDataURL(dataURL) {
-            return dataURL.replace('data:', '').replace(/^.+,/, '');
-        },
-
-
-
     },
 };
 </script>
@@ -274,3 +267,5 @@ ion-input.custom-input {
     border: 2px solid #034561;
 }
 </style>
+    
+  
