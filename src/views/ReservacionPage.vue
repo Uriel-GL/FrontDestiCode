@@ -1,6 +1,7 @@
 <template>
     <ion-page>
       <app-bar-custom title="Tus Reservaciones"></app-bar-custom>
+      <loading :active="isLoading" :can-cancel="false" :is-full-page="true" />
   
       <ion-content>
         <div class="bodyReservaciones">
@@ -30,19 +31,19 @@
 
                 <ion-grid class="gridRutas" v-if="TusTickets.length > 0">
                   <ion-row>
-                    <ion-col v-for="ticket in TusTickets" :key="ticket.id_Ruta">
+                    <ion-col v-for="ticket in TusTickets" :key="ticket.id_Reservacion">
                       <ion-card>
                         <ion-card-header class="header ion-text-center">
                           <ion-card-title><ion-text class="textHeader">Ticket de Ruta</ion-text></ion-card-title>
                         </ion-card-header>
                         <ion-card-content>
-                          <div class="ion-text-center">
+                          <div class="ion-text-center" >
                             <br>
-                            <ion-text><b>{{ ticket.lugar_Salida }}</b></ion-text>
+                            <ion-text><b>{{ ticket.rutas.lugar_Salida }}</b></ion-text>
                             <br>
                             <ion-icon :icon="arrowDown" color="success"></ion-icon>
                             <br>
-                            <ion-text><b>{{ ticket.lugar_Destino }}</b></ion-text>
+                            <ion-text><b>{{ ticket.rutas.lugar_Destino }}</b></ion-text>
                             <br>
                             <br>
                           </div>
@@ -50,11 +51,16 @@
                             <ion-col size="8">
                               <ion-label>Fecha y hora de salida</ion-label>
                               <br>
-                              <ion-text><b>{{ ticket.fecha_Salida }}</b></ion-text>
+                              <ion-text><b>{{ formatoFecha(ticket.rutas.fecha_Salida) }}</b></ion-text>
                             </ion-col>
                             <ion-col size="4">
                               <ion-text>Num Ticket</ion-text>
                               <div class="barcode"></div>
+                            </ion-col>
+                            <ion-col class="colEliminar">
+                              <ion-button @click="openModalConfirm(ticket.id_Ruta, ticket.id_Reservacion, ticket.num_Asientos)" fill="clear" color="danger" shape="round" >
+                              <ion-icon :icon="trashOutline" slot="icon-only"></ion-icon>
+                            </ion-button>
                             </ion-col>
                           </ion-row>
                         </ion-card-content>
@@ -108,11 +114,11 @@
                           <h3 class="salida">
                             Salida: 
                             <br>
-                            <ion-text color="primary"><b>{{ ruta.fecha_Salida }}</b></ion-text> 
+                            <ion-text color="primary"><b>{{ formatoFecha(ruta.fecha_Salida) }}</b></ion-text> 
                           </h3>
                           
                         </ion-card-content>
-                        <ion-button @click="VerSolicitantes(ruta.id_Ruta)" :disabled="ruta.estatus == false" color="success"  class="btnViaje">
+                        <ion-button @click="VerSolicitantes(ruta.id_Ruta)" expand="full" :disabled="ruta.estatus == false" color="success"  class="btnViaje">
                           Ver Solicitudes
                         </ion-button>
                       </ion-card>
@@ -124,27 +130,88 @@
             
             </ion-card>
         </div>
-      </ion-content>
+
+        <!-- Modal de confirmación de cancelar -->
+        <ion-modal ref="modal" :is-open="showModalConfirm">
+          <div class="bodyModal">
+            <h2>Cancelar Reservación</h2>
+            <ion-icon :icon="trashOutline" color="danger"></ion-icon>
+            <h3>Estar por cancelar tu reservación<br>¿Estas seguro?</h3>
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-button @click="showModalConfirm = false" fill="clear" shape="round">
+                    Cancelar
+                  </ion-button>
+                  <ion-button @click="cancelarLugar" shape="round" color="success">
+                    Confirmar
+                  </ion-button>
+                </ion-col>     
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-modal>
+
+        <!-- Modal de confirmación de cancelacion -->
+        <ion-modal ref="modal" :is-open="showModalSuccess">
+          <div class="bodyModal">
+            <h2>Cancelación Exitosa</h2>
+            <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
+            <h3>Se cancelo tu lugar en la ruta.</h3>
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-button @click="showModalSuccess = false" shape="round" color="success">
+                    Confirmar
+                  </ion-button>
+                </ion-col>     
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-modal>
   
+        <!-- Modal de error de actualización de tu vehiculo -->
+        <ion-modal ref="modal" :is-open="showModalError">
+          <div class="bodyModal">
+            <h2>Error al reservar</h2>
+            <ion-icon :icon="closeOutline" color="danger"></ion-icon>
+            <h3>No pudimos reservar tu lugar, intenta mas tarde.</h3>
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-button @click="showModalError = false" shape="round" color="success">
+                    Confirmar
+                  </ion-button>
+                </ion-col>     
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-modal>
+      </ion-content>
     </ion-page>
   </template>
   
 <script>
 //Componentes
 import AppBarCustom from '../components/NavBarCustom.vue'
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardHeader, 
-  IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton
+  IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal
 } from '@ionic/vue'
 //Iconos
-import { arrowDown, ticketOutline, carOutline, ellipse } from 'ionicons/icons'
+import { 
+  arrowDown, ticketOutline, carOutline, ellipse, trashOutline, checkmarkOutline, closeOutline
+} from 'ionicons/icons'
 //Servicios
 import RutaService from '@/Services/RutaService'
+import moment from 'moment'
 export default {
   components: {
-    AppBarCustom,
+    AppBarCustom,Loading,
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardHeader, 
-    IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton
+    IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal
   },
   
   data: () => ({
@@ -153,24 +220,44 @@ export default {
     ticketOutline,
     carOutline,
     ellipse,
+    trashOutline,
+    checkmarkOutline,
+    closeOutline,
 
+    showModalConfirm: false,
+    showModalSuccess: false,
+    showModalError: false,
     ShowTickets: false,
+    isLoading: false,
     ShowRutas: false,  
+
     TusTickets: [],
     TusRutas: [],
+    Reservaciones: [],
+
+    idRuta: '',
+    idReservacion: '',
+    numAsientos: 0
   }),
 
   async created() {
-    var id = this.$cookies.get('Usuario')
-    const response = await RutaService.getRutaByIdUsuario(id)
-    const responseTicket = await RutaService.getTickets(id)
-    this.TusRutas = JSON.parse(JSON.stringify(response.data))
-    this.TusTickets = JSON.parse(JSON.stringify(responseTicket.data))
-    console.log(this.TusRutas)
-    console.log(this.TusTickets)
+    await this.cargarDatos()
   },
-
+  
   methods: {
+    async cargarDatos(){
+      var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
+      if(SessionValid){
+        var id = this.$cookies.get('Usuario')
+        const response = await RutaService.getRutaByIdUsuario(id)
+        const responseTicket = await RutaService.getTickets(id)
+        this.TusRutas = JSON.parse(JSON.stringify(response.data))
+        this.TusTickets = JSON.parse(JSON.stringify(responseTicket.data))
+      }else{
+        this.$router.push('/login')
+      }
+    },
+
     showTickets(){
       this.ShowTickets = true;
       this.ShowRutas = false;
@@ -183,6 +270,44 @@ export default {
 
     VerSolicitantes(Id_Ruta){
       console.log(Id_Ruta)
+    },
+
+    formatoFecha(date){
+      const fechaFormateada = moment(date).format('DD [de] MMMM YYYY, h:mm A');
+      return fechaFormateada;
+    },
+
+    openModalConfirm(id_Ruta, id_Reservacion, num_Asientos){
+      this.idRuta = id_Ruta;
+      this.idReservacion = id_Reservacion;
+      this.numAsientos = num_Asientos;
+      
+      this.showModalConfirm = true;
+    },
+
+    async cancelarLugar(){
+      this.isLoading = true;
+      this.showModalConfirm = false;
+
+      const cancelacion = {
+        Id_Ruta: this.idRuta,
+        Id_Reservacion: this.idReservacion,
+        Num_Lugares_Cancelar: this.numAsientos
+      }
+      
+      const response = await RutaService.cancelarLugar(cancelacion);
+      setTimeout(() => {
+        if(response.status == 201 || response.status == 200){
+          this.isLoading = false;
+          this.showModalSuccess = true;
+        }else{
+          this.isLoading = false;
+          this.showModalSuccess = false;
+          this.showModalError = true;
+        }
+      }, 3000);
+
+      console.log(cancelacion)
     }
   },
 
@@ -245,6 +370,13 @@ export default {
               81px 0 0 1px #343434;
 }
 
+.colEliminar{
+  margin: 0;
+  height: 20px;
+}
+.colEliminar ion-button {
+  margin-top: -10px;
+}
 .gridRutas {
   padding: 0;
 }
@@ -260,6 +392,7 @@ export default {
 
 .cardViaje {
   max-width: 450px;
+  border-radius: 13px;
   padding: 0px;
   margin: 0 auto;
 }
@@ -305,5 +438,18 @@ ion-card-subtitle{
 .textCard {
   font-weight: bold;
 }
-  
+
+ion-modal {
+    --width: fit-content;
+    --height: fit-content;
+    --border-radius: 10px;
+}
+.bodyModal {
+  padding: 10px;
+  text-align: center;
+}
+
+.bodyModal ion-icon {
+  font-size: 36px;
+}
 </style>

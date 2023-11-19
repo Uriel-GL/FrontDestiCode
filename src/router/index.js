@@ -2,11 +2,11 @@ import { createRouter, createWebHistory } from '@ionic/vue-router';
 import HomePage from '../views/HomePage.vue';
 import RegistroPage from '../views/RegistroPage.vue';
 import VehiculoPage from '../views/VehiculosPage.vue';
-import RutasPage from '../views/RutasPage.vue';
+import ActualizarVehiculoPage from '../views/ActualiVehiculoPage.vue';
 
 import TabBarComponent from '../components/tabBarComponent.vue'
 
-import Publicaciones from '../views/PubliRutaPage.vue';
+import Publicaciones from '../views/RutasPage.vue';
 import Reservaciones from '../views/ReservacionPage.vue';
 import Perfil from '../views/PerfilPage.vue';
 import RutaDetalle from '../views/DetalleRutaPage.vue';
@@ -67,10 +67,10 @@ const routes = [
     component: VehiculoPage
   },
   {
-    path: '/rutas',
-    name: 'RegistroRutas',
-    component: RutasPage
-  }
+    path: '/Actualizar-Vehiculo/:id?',
+    name: 'ActualizarVehiculo',
+    component: ActualizarVehiculoPage
+  },
 ]
 
 const router = createRouter({
