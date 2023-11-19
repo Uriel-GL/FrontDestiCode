@@ -10,10 +10,7 @@ const apiClient = axios.create({
 });
 
 export default {
-    getVehiculosByUsuario(Id_Usuario){
-        return apiClient.get(`/Vehiculos/GetVehiculosByUsuario/${Id_Usuario}`)
-    },
-    registerVehiculo(vehiculo){
-        return apiClient.post('/Vehiculos/RegistrarVehiculo', vehiculo)
+    getUserInfo(Id_Usuario){
+        return apiClient.get(`/Usuarios/GetUsuarioInfo/${Id_Usuario}`)
     }
 }

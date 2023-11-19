@@ -145,6 +145,7 @@ export default {
     origenes: [],
     showOrigenes: false,
     showDestinos: false,
+    showMessage: false,
 
     rutasItems: [],
     rutasFiltradas: []
@@ -160,10 +161,10 @@ export default {
       this.rutasItems = JSON.parse(JSON.stringify(response.data));
   
       const origenSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Salida))
-      const destinoSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Salida))
+      const destinoSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Destino))
   
       this.origenes = Array.from(origenSet);
-      this.destinos = Array.from(destinoSet)
+      this.destinos = Array.from(destinoSet);
   
       console.log(this.rutasItems)
       console.log(this.origenes)
@@ -202,7 +203,7 @@ export default {
           rutaAprox.lugar_Destino.includes(this.DestinoValue.trim()) && 
           rutaAprox.lugares_Disponibles <= this.LugaresValue
         )
-        console.log("Rutas " + this.rutasItems.length)
+        
       }else{
         console.log("Valores no validos")
       }

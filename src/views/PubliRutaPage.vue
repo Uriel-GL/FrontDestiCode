@@ -100,11 +100,13 @@
                     <ion-icon :icon="carOutline"></ion-icon>
                   </ion-col>
                   <ion-col size="11">
-                    <ion-select v-model="nuevaRuta.Id_Unidad" interface="popover" placeholder="Selecciona un Vehículo" fill="outline" color="success">
+                    <ion-select v-model="nuevaRuta.Id_Unidad" interface="popover" placeholder="Selecciona un Vehículo" 
+                    fill="outline" color="success" @ionChange="RegisterVehiculo">
                       <ion-select-option v-for="car in vehiculo" :key="car.id_Unidad" color="success" 
                       :value="car.id_Unidad">
                         {{ car.modelo }}
                       </ion-select-option>
+                      <ion-select-option v-if="vehiculo.length < 2">Registrar</ion-select-option>
                     </ion-select>
                   </ion-col>
                 </ion-row>
@@ -241,6 +243,13 @@ export default {
         Estatus: true  
       }
     },
+    
+    RegisterVehiculo() {
+      if(this.nuevaRuta.Id_Unidad === 'Registrar'){
+        this.$router.push('vehiculos')
+        console.log("HOLA")
+      }
+    }
   }
 }
 </script>

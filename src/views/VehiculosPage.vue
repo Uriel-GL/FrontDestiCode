@@ -1,45 +1,76 @@
 <template>
     <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Registro de Vehículo</ion-title>
-            </ion-toolbar>
-        </ion-header>
+        <app-bar-custom title="Vehículo"></app-bar-custom>
 
         <ion-content class="ion-padding">
-            <ion-card class="ion-card-small">
+            <ion-card class="cardVehiculo">
+                <ion-card-header>
+                    <ion-card-title>Registra tu Vehiculo</ion-card-title>
+                    <ion-card-subtitle>Ingresa toda la información</ion-card-subtitle>
+                </ion-card-header>
                 <ion-card-content>
-                    <ion-list>
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Color</ion-label>
-                            <ion-input aria-label="Color" v-model="color" type="text" required
-                                class="custom-input custom-input-border-color-1"></ion-input>
-                        </ion-item>
+                    <ion-grid class="gridCard">
+                        <ion-row>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Placa</ion-label>
-                            <ion-input aria-label="Placa" v-model="placa" type="text" required
-                                class="custom-input custom-input-border-color-2"></ion-input>
-                        </ion-item>
+                            <ion-col size="10">
+                                <ion-input label="Modelo" label-placement="floating" 
+                                placeholder="Ingresa el modelo de tu Auto" v-model="modelo"
+                                fill="outline" color="success" :clear-input="true"
+                                />
+                            </ion-col>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Modelo</ion-label>
-                            <ion-input aria-label="Modelo" v-model="modelo" type="text" required
-                                class="custom-input custom-input-border-color-3"></ion-input>
-                        </ion-item>
+                            <ion-col size="10">
+                                <ion-input label="Color" label-placement="floating" 
+                                placeholder="Ingresa el color de tu Auto" v-model="color"
+                                fill="outline" color="success" :clear-input="true"
+                                />
+                            </ion-col>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Imagen del Vehículo</ion-label>
-                            <ion-input aria-label="Imagen" v-model="imagen" type="file" @change="handleFileChange" class="custom-file-input"
-                                required />
-                        </ion-item>
+                            <ion-col size="10">
+                                <ion-input label="Núm.Placa" label-placement="floating" 
+                                placeholder="Ingresa el número de placa de tu Auto" v-model="placa"
+                                fill="outline" color="success" :clear-input="true"
+                                />
+                            </ion-col>
+                        </ion-row>
+                        <br>
+                        <ion-row>
+                            <ion-col class="colImage">
+                                <ion-card-title>Fotografia de Referencia</ion-card-title>
+                                <ion-card-subtitle>
+                                    Agrega una imagen de referencia, para mayor facilidad de ubicar tu Vehiculo a los demas.
+                                </ion-card-subtitle>
+                            </ion-col>
+                        </ion-row>
+                        
+                        <ion-row>
+                            <ion-col>
+                                <ion-item>
+                                    <label class="image-upload">
+                                        <ion-input aria-label="Imagen" 
+                                        v-model="imagen" 
+                                        type="file" 
+                                        @change="handleFileChange" 
+                                        class="custom-file-input"
+                                        required />
+                                        <ion-icon :icon="cloudUploadOutline"></ion-icon>
+                                        Subir Imagen
+                                    </label>
+                                </ion-item>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
 
-                        <ion-item class="rounded-item">
-                            <ion-img :src="imagenPreview" v-if="imagenPreview"></ion-img>
-                        </ion-item>
+                    <ion-img :src="imagenPreview" v-if="imagenPreview"></ion-img>
 
-                        <ion-button expand="full" @click="submitForm" class="custom-button">Registrar Vehículo</ion-button>
-                    </ion-list>
+                    <div class="botones">
+                        <ion-button fill="clear" color="danger" shape="round" @click="backPublicaciones">
+                            Cancelar
+                        </ion-button>
+                        <ion-button shape="round" @click="submitForm" >
+                            Registrar
+                        </ion-button>
+                    </div>
                 </ion-card-content>
             </ion-card>
         </ion-content>
@@ -48,43 +79,36 @@
   
   
 <script>
+//Componentes
+import AppBarCustom from '../components/NavBarCustom.vue'
+//Ionic
 import {
-    IonInput,
-    IonText,
-    IonCard,
-    IonCardContent,
-    IonButton,
-    IonImg,
-    IonTitle,
-    IonToolbar,
-    IonHeader,
-    IonLabel, IonItem, IonList, IonContent, IonPage
+    IonInput, IonText, IonCard, IonCardContent, IonButton, IonImg, IonTitle, IonToolbar, IonHeader,
+    IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol
 } from '@ionic/vue';
-
+//Iconos
+import { cloudUploadOutline } from 'ionicons/icons'
+//Servicios 
+import VehiculoService from '@/Services/VehiculoService';
 export default {
     components: {
-        IonInput,
-        IonText,
-        IonCard,
-        IonCardContent,
-        IonButton,
-        IonImg,
-        IonTitle,
-        IonToolbar,
-        IonHeader,
-        IonLabel, IonItem, IonList, IonContent, IonPage
+        AppBarCustom,
+        IonInput, IonText, IonCard, IonCardContent, IonButton, IonImg, IonTitle, IonToolbar,
+        IonHeader, IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol
     },
-    data() {
-        return {
-            id_Unidad: '',
-            id_Usuario: '724083E0-46F6-4B7D-8488-C83AA7219F1E',
-            color: '',
-            placa: '',
-            modelo: '',
-            imagen: null,
-            imagenPreview: null,
-        };
-    },
+    data: () => ({
+        //Iconos
+        cloudUploadOutline,
+
+        id_Unidad: '',
+        id_Usuario: '',
+        color: '',
+        placa: '',
+        modelo: '',
+        imagen: null,
+        imagenPreview: null,
+    }),
+
     methods: {
         handleFileChange(event) {
             const file = event.target.files[0];
@@ -140,37 +164,35 @@ export default {
                 };
 
                 const nuevoVehiculo = {
-                    id_Unidad: generateGuid(), //this.id_Unidad,
-                    id_Usuario: this.id_Usuario,
-                    color: this.color,
-                    placa: this.placa,
-                    imagen: imagenBase64,
-                    modelo: this.modelo
+                    Id_Unidad: generateGuid(), //this.id_Unidad,
+                    Id_Usuario: this.$cookies.get('Usuario'),
+                    Color: this.color,
+                    Placa: this.placa,
+                    Imagen: imagenBase64,
+                    Modelo: this.modelo
                 };
+                
+                const response = await VehiculoService.registerVehiculo(nuevoVehiculo)
 
-                const response = await fetch("https://localhost:7038/api/Vehiculos", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(nuevoVehiculo),
-                });
-
-                if (!response.ok) {
-                    alert("No se pudo registrar el vehiculo")
-                    return;
-                } else {
+                if(response.status == 201 || response.status == 200){
                     alert("Registro Exitoso")
-                    // Después de un registro exitoso, restablece los valores a vacío
-                    this.color = '';
-                    this.placa = '';
-                    this.modelo = '';
-                    this.imagen = null;
-                    this.imagenPreview = null;
+                    this.limpiarFormulario()
+                    //this.$router.push('/home')
+                }else{
+                    alert("No se pudo registrar el vehiculo")
                 }
-                //alert("Correcto");
             }
         },
+
+        limpiarFormulario() {
+            // Después de un registro exitoso, restablece los valores a vacío
+            this.color = '';
+            this.placa = '';
+            this.modelo = '';
+            this.imagen = null;
+            this.imagenPreview = null;
+        },
+
         async getBase64Image() {
             return new Promise((resolve) => {
                 const image = new Image();
@@ -189,19 +211,60 @@ export default {
                     // Obtener el base64 del canvas
                     const dataURL = canvas.toDataURL("image/png"); // Puedes cambiar "image/png" según el formato deseado
 
-                    console.log(dataURL);
+                    //console.log(dataURL);
                     resolve(dataURL);
                 };
             });
         },
+
+        backPublicaciones(){
+            this.$router.push('/publicaciones')
+        }
     },
 };
 </script>
   
 <style scoped>
-.ion-card-small {
-    max-width: 700px;
+ion-card-header {
+    text-align: center;
+}
+ion-img {
+    margin-left: -10px;
+    width: 300px;
+    height: 200px;
+}
+.colImage{
+    text-align: center;
+}
+.cardVehiculo {
     margin: 0 auto;
+    max-width: 700px;
+}
+.gridCard ion-row {
+    justify-content: center;
+}
+.btnUpload {
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+}
+.image-upload {
+  margin: 0 auto; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4FB783;
+}
+.image-upload ion-input {
+  display: none;
+}
+.image-upload ion-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
 }
 
 ion-card {
@@ -222,49 +285,11 @@ ion-item {
     /* Elimina el borde interno */
 }
 
-ion-item.rounded-item {
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-ion-label.custom-label {
-    width: 40%;
-    text-align: right;
-    margin-right: 20px;
-}
-
-ion-input.custom-input {
-    width: 60%;
-    border-radius: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border: 2px solid #ccc;
-}
-
-.custom-button {
-    border-radius: 10px;
-    --color: #F5FCCD;
-    --background: #034561;
-    font-size: 14px;
-    /* Ajusta el tamaño de fuente según tus preferencias */
-    padding: 8px 16px;
-    /* Ajusta el relleno (padding) según tus preferencias */
-}
-
-.custom-input-border-color-1 {
-    border: 2px solid #F5FCCD;
-}
-
-.custom-input-border-color-2 {
-    border: 2px solid #4FB783;
-}
-
-.custom-input-border-color-3 {
-    border: 2px solid #409D9B;
-}
-
-.custom-input-border-color-4 {
-    border: 2px solid #034561;
+.botones {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-content: center;
 }
 </style>
     
