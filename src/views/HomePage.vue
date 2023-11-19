@@ -2,12 +2,11 @@
   <ion-page>
     <app-bar-custom title="DestiCode"></app-bar-custom>
 
-    <ion-content>
+    <!-- <img class="imgLogo"
+    src="https://images.pexels.com/photos/56832/road-asphalt-space-sky-56832.jpeg" /> -->
+
+    <ion-content class="ion-padding">
       <div class="bodyHome">
-        <!-- <center>
-          <img class="imgLogo"
-          src="https://firebasestorage.googleapis.com/v0/b/tiendaservicios-b7281.appspot.com/o/Imagenes%2FDestiCodeLogo.jpg?alt=media&token=900234a0-575d-4ccb-a434-584bce3937d8" />
-        </center> -->
         <!-- Card de Filtros de Rutas -->
         <ion-card class="cardFilter">
           <ion-card-title>¿A dónde quieres ir?</ion-card-title>
@@ -17,7 +16,7 @@
               <ion-row>
                 <ion-col>
                   <ion-input label="Origen" label-placement="floating" fill="outline"
-                    v-model="OrigenValue" @input="listarOrigenes"
+                    v-model="OrigenValue" @input="listarOrigenes" :clear-input="true"
                     color="success">
                   </ion-input>
                   <ion-list v-if="showOrigenes">
@@ -29,7 +28,8 @@
 
                 <ion-col>
                   <ion-input label="Destino" label-placement="floating" fill="outline"
-                    v-model="DestinoValue" required color="success" @input="listarDestinos">
+                    v-model="DestinoValue" required color="success" @input="listarDestinos"
+                    :clear-input="true">
                   </ion-input>
                   <ion-list v-if="showDestinos">
                     <ion-item button="true" v-for="destino in filtrarDestinos" :key="destino" @click="selectDestino(destino)">
@@ -50,7 +50,10 @@
                 </ion-col>
 
                 <ion-col class="colBtnBuscar" size="6">
-                  <ion-button @click="buscarRutas" class="btnBuscar" shape="round">Buscar</ion-button>
+                  <ion-button @click="buscarRutas" class="btnBuscar" shape="round">
+                    <ion-icon :icon="searchOutline" slot="start"></ion-icon>
+                    Buscar
+                  </ion-button>
                 </ion-col>
             </ion-row>
 
@@ -59,6 +62,16 @@
         </ion-card>
 
         <br>
+        <!-- Mensaje en caso no haber rutas filtradas -->
+        <ion-card class="cardMessage" v-if="showMessage">
+          <ion-card-content>
+            <div class="bodyRutasExis ion-text-center">
+              <ion-icon :icon="navigateOutline"></ion-icon>
+                <h2>Actualmente no hay rutas para tus datos de busqueda</h2> 
+            </div>
+          </ion-card-content>
+        </ion-card>
+
         <!-- Iteracion de cards para rutas -->
         <div class="cards">
           <ion-grid>
@@ -86,16 +99,16 @@
                       <b>Viaje Lleno</b>
                     </h4>
                     <h3 class="salida">
-                      Lugares: 
+                      Lugares Dsponibles: 
                       <ion-text color="success"><b>{{ ruta.lugares_Disponibles }}</b></ion-text>
                     </h3>
                     <h3 class="salida">
                       Salida: 
-                      <ion-text color="primary"><b>{{ ruta.fecha_Salida }}</b></ion-text> 
+                      <ion-text color="primary"><br><b>{{ formatoFecha(ruta.fecha_Salida) }}</b></ion-text> 
                     </h3>
                     
                   </ion-card-content>
-                  <ion-button @click="IrADetalle(ruta.id_Ruta)" color="success" :disabled="ruta.estatus == false" class="btnViaje">Ver Viaje</ion-button>
+                  <ion-button @click="IrADetalle(ruta.id_Ruta)" expand="full" color="success" :disabled="ruta.estatus == false" class="btnViaje">Ver Viaje</ion-button>
                 </ion-card>
               </ion-col>
             </ion-row>
@@ -118,9 +131,10 @@
   import { IonRow, IonCol, IonButton, IonIcon, IonInput, IonGrid, IonLabel,IonItemDivider, IonList  } from '@ionic/vue'
   import { IonAvatar, IonChip } from '@ionic/vue'
   //Iconos
-  import { ellipse, arrowDown, arrowUp } from 'ionicons/icons'
+  import { ellipse, arrowDown, arrowUp, navigateOutline, searchOutline } from 'ionicons/icons'
   //Servicios
   import RutaService from '../Services/RutaService'
+  import moment from 'moment'
 
 export default {
   components: {
@@ -136,6 +150,8 @@ export default {
     ellipse,
     arrowDown,
     arrowUp,
+    navigateOutline,
+    searchOutline,
     //#endregion
 
     OrigenValue: '',
@@ -145,33 +161,14 @@ export default {
     origenes: [],
     showOrigenes: false,
     showDestinos: false,
+    showMessage: false,
 
     rutasItems: [],
     rutasFiltradas: []
   }),
 
   async created() {
-    var acess = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
-
-    if(acess){
-      this.OrigenValue = ""
-      this.LugaresValue = ""
-      const response = await RutaService.getAllRutas()
-      this.rutasItems = JSON.parse(JSON.stringify(response.data));
-  
-      const origenSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Salida))
-      const destinoSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Salida))
-  
-      this.origenes = Array.from(origenSet);
-      this.destinos = Array.from(destinoSet)
-  
-      console.log(this.rutasItems)
-      console.log(this.origenes)
-      console.log(this.destinos)
-
-    }else{
-      this.$router.push('/login')
-    }
+    await this.cargarDatos()
   },
 
   computed: {
@@ -195,6 +192,33 @@ export default {
   },
 
   methods: {
+    async cargarDatos(){
+      var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
+      if(SessionValid){
+        this.OrigenValue = ""
+        this.LugaresValue = ""
+        const response = await RutaService.getAllRutas()
+        this.rutasItems = JSON.parse(JSON.stringify(response.data));
+    
+        const origenSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Salida))
+        const destinoSet = new Set(this.rutasItems.map((ruta) => ruta.lugar_Destino))
+    
+        this.origenes = Array.from(origenSet);
+        this.destinos = Array.from(destinoSet);
+    
+        console.log(this.rutasItems)
+        console.log(this.origenes)
+        console.log(this.destinos)
+      }else{
+        this.$router.push('/login')
+      }
+    },
+
+    formatoFecha(date){
+      const fechaFormateada = moment(date).format('DD [de] MMMM YYYY, h:mm A');
+      return fechaFormateada;
+    },
+
     buscarRutas() {
       if( this.OrigenValue != "" && this.DestinoValue != ""){
         this.rutasFiltradas = this.rutasItems.filter(rutaAprox => 
@@ -202,7 +226,11 @@ export default {
           rutaAprox.lugar_Destino.includes(this.DestinoValue.trim()) && 
           rutaAprox.lugares_Disponibles <= this.LugaresValue
         )
-        console.log("Rutas " + this.rutasItems.length)
+        if(this.rutasFiltradas.length > 0){
+          this.showMessage = false;
+        }else{
+          this.showMessage = true;
+        }
       }else{
         console.log("Valores no validos")
       }
@@ -239,13 +267,19 @@ export default {
 
 <style scoped>
 .imgLogo {
-  max-width: 350px;
-  max-height: 120px;
+  max-width: 100%;
+  max-height: 400px;
 }
 .bodyHome {
   padding: 10px;
 }
-
+.cardMessage {
+  margin: 0 auto;
+  max-width: 450px;
+}
+.bodyRutasExis ion-icon {
+  font-size: 46px;
+}
 .cardFilter {
   max-width: 450px;
   margin: 0 auto;
@@ -253,6 +287,7 @@ export default {
 
 .cardViaje {
   max-width: 450px;
+  border-radius: 13px;
   padding: 0px;
   margin: 0 auto;
 }

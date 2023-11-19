@@ -29,7 +29,7 @@
                                         <ion-icon :icon="location" color="danger"></ion-icon>
                                         Fecha y Hora de Salida
                                     </ion-card-title>
-                                    <ion-card-subtitle>{{ this.ruta.fecha_Salida }}</ion-card-subtitle>
+                                    <ion-card-subtitle>{{ formatoFecha(ruta.fecha_Salida) }}</ion-card-subtitle>
                                     <br>
                                     <ion-card-title>Costo por Persona</ion-card-title>
                                     <ion-chip outline="true" color="success">
@@ -110,10 +110,10 @@
                             </ion-col>
                             <ion-col size="12">
                                 <div class="btnApartar">
-                                    <ion-button @click="showModal = false" expand="full" shape="round">
+                                    <ion-button @click="showModal = false" expand="full" fill="clear" shape="round">
                                         Cancelar
                                     </ion-button>
-                                    <ion-button @click="apartarLugar" expand="full" shape="round" color="success">
+                                    <ion-button @click="apartarLugar" :disabled="reservacion.Num_Asientos <= 0" expand="full" shape="round" color="success">
                                         Apartar lugar
                                     </ion-button>
                                 </div>
@@ -123,6 +123,41 @@
                 </div>
             </ion-modal>
 
+            <!-- Modal de confirmación de reservación -->
+            <ion-modal ref="modal" :is-open="showModalConfirm">
+                <div class="bodyModal">
+                    <h2>Reservación Exitosa</h2>
+                    <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
+                    <h3>Ya tienes un Ticket para esta Ruta</h3>
+                    <ion-grid>
+                    <ion-row>
+                        <ion-col>
+                        <ion-button @click="showModalConfirm = false" shape="round" color="success">
+                            Confirmar
+                        </ion-button>
+                        </ion-col>     
+                    </ion-row>
+                    </ion-grid>
+                </div>
+            </ion-modal>
+
+            <!-- Modal de error de actualización de tu vehiculo -->
+            <ion-modal ref="modal" :is-open="showModalError">
+                <div class="bodyModal">
+                    <h2>Error al reservar</h2>
+                    <ion-icon :icon="closeOutline" color="success"></ion-icon>
+                    <h3>No pudimos reservar tu lugar, intenta mas tarde.</h3>
+                    <ion-grid>
+                    <ion-row>
+                        <ion-col>
+                        <ion-button @click="showModalError = false" shape="round" color="success">
+                            Confirmar
+                        </ion-button>
+                        </ion-col>     
+                    </ion-row>
+                    </ion-grid>
+                </div>
+            </ion-modal>
         </ion-content>
     </ion-page>
 </template>
@@ -140,10 +175,11 @@ import {
 //Iconos
 import { 
     ellipse, arrowDown, arrowUp, cash, carSport, colorPalette, man, idCardOutline, location, addCircleOutline,
-    removeCircleOutline
+    removeCircleOutline, checkmarkOutline, closeOutline, trashOutline
 } from 'ionicons/icons'
 //Servicios
 import RutaService from '@/Services/RutaService';
+import moment from 'moment';
 
 export default {
     components: {
@@ -165,8 +201,13 @@ export default {
         location,
         addCircleOutline,
         removeCircleOutline,
+        checkmarkOutline,
+        closeOutline,
+        trashOutline,
 
         //Variables de la pagina
+        showModalConfirm: false,
+        showModalError: false,
         showModal: false,
         isLoading: false,
         fullPage: true,
@@ -185,14 +226,23 @@ export default {
     }),
 
     async created() {
-        const response = await RutaService.getRutaByIdRuta(this.$route.params.id)
-        this.ruta = JSON.parse(JSON.stringify(response.data))
-        this.usuario = JSON.parse(JSON.stringify(response.data.usuarios))
-        this.vehiculo = JSON.parse(JSON.stringify(response.data.vehiculos))
-        this.showModal = false
+        await this.cargarDatos()
     },
 
     methods: {
+        async cargarDatos(){
+            var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
+            if(SessionValid){
+                const response = await RutaService.getRutaByIdRuta(this.$route.params.id)
+                this.ruta = JSON.parse(JSON.stringify(response.data))
+                this.usuario = JSON.parse(JSON.stringify(response.data.usuarios))
+                this.vehiculo = JSON.parse(JSON.stringify(response.data.vehiculos))
+                this.showModal = false
+            }else{
+                this.$router.push('/login')
+            }
+        },
+
         async apartarLugar(){
             this.showModal = false
             this.isLoading = true
@@ -201,10 +251,20 @@ export default {
 
             const response = await RutaService.reservarLugar(this.reservacion)
             setTimeout(() => {
-                alert(JSON.parse(JSON.stringify(response.data)))
-                this.isLoading = false
+                if(response.status == 201 || response.status == 200){
+                    this.isLoading = false
+                    this.showModalConfirm = true;
+                }else{
+                    this.isLoading = false; 
+                    this.showModalError = true;
+                }
             }, 5000);
             console.log(this.reservacion)
+        },
+
+        formatoFecha(date){
+            const fechaFormateada = moment(date).format('DD [de] MMMM YYYY, h:mm A');
+            return fechaFormateada;
         },
     },
 }
@@ -235,7 +295,12 @@ ion-modal {
     --border-radius: 10px;
 }
 .bodyModal {
-    padding: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.bodyModal ion-icon {
+  font-size: 36px;
 }
 
 .bodyModal h2{

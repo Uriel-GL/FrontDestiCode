@@ -38,8 +38,8 @@ export default {
         return apiClient.post('/Rutas/ReservarLugar', reservacion)
     },
 
-    cancelarLugar(){
-
+    cancelarLugar(cancelacion){
+        return apiClient.post('/Rutas/CancelarLugar', cancelacion)
     },
 
     eliminarRuta(){
