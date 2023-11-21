@@ -99,7 +99,7 @@
                       <b>Viaje Lleno</b>
                     </h4>
                     <h3 class="salida">
-                      Lugares Dsponibles: 
+                      Lugares Disponibles: 
                       <ion-text color="success"><b>{{ ruta.lugares_Disponibles }}</b></ion-text>
                     </h3>
                     <h3 class="salida">

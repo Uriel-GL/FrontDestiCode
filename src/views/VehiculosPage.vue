@@ -1,6 +1,7 @@
 <template>
     <ion-page>
         <app-bar-custom title="Vehículo"></app-bar-custom>
+        <loading :active="isLoading" :can-cancel="false" :is-full-page="true" />
 
         <ion-content class="ion-padding">
             <ion-card class="cardVehiculo">
@@ -73,7 +74,56 @@
                     </div>
                 </ion-card-content>
             </ion-card>
+
         </ion-content>
+
+        <!-- Modal de confirmación de registro de tu ruta -->
+        <ion-modal ref="modal" :is-open="showModalConfirm">
+        <div class="bodyModal">
+            <h2>Registro Exitoso</h2>
+            <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
+            <h3>Tu vehiculo ahora se encuentra publicado.</h3>
+            <ion-grid>
+            <ion-row>
+                <ion-col>
+                <ion-button @click="showModalConfirm = false" shape="round" color="success">
+                    Confirmar
+                </ion-button>
+                </ion-col>     
+            </ion-row>
+            </ion-grid>
+        </div>
+        </ion-modal>
+
+        <!-- Modal de alerta de registro de tu vehiculo -->
+        <ion-modal ref="modal" :is-open="ShowAlertLimite">
+        <div class="bodyModal">
+            <h2>Advertencia</h2>
+            <ion-icon :icon="alertOutline" color="warning"></ion-icon>
+            <h3>Solo puedes publicar 2 vehiculos y actualmente excedes el limite, borra una para continuar.</h3>
+            <ion-grid>
+            <ion-row>
+                <ion-col>
+                <ion-button @click="ShowAlertLimite = false" shape="round" color="success">
+                    Confirmar
+                </ion-button>
+                </ion-col>     
+            </ion-row>
+            </ion-grid>
+        </div>
+        </ion-modal>
+
+        <!-- Totas de error en la api invalidas -->
+        <ion-toast 
+        position="top" 
+        position-anchor="header" 
+        message="Ocurrio un error intenta mas tarde."
+        :is-open="isErrorVehiculo"
+        color="danger"
+        :duration="2000"
+        :icon="wifiOutline"
+        ></ion-toast>
+
     </ion-page>
 </template>
   
@@ -81,24 +131,32 @@
 <script>
 //Componentes
 import AppBarCustom from '../components/NavBarCustom.vue'
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
 import {
     IonInput, IonText, IonCard, IonCardContent, IonButton, IonImg, IonTitle, IonToolbar, IonHeader,
-    IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol
+    IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol, IonToast
 } from '@ionic/vue';
 //Iconos
-import { cloudUploadOutline } from 'ionicons/icons'
+import { 
+    cloudUploadOutline, wifiOutline, alertOutline, checkmarkOutline 
+} from 'ionicons/icons'
 //Servicios 
 import VehiculoService from '@/Services/VehiculoService';
 export default {
     components: {
-        AppBarCustom,
+        AppBarCustom,Loading,
         IonInput, IonText, IonCard, IonCardContent, IonButton, IonImg, IonTitle, IonToolbar,
-        IonHeader, IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol
+        IonHeader, IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol,
+        IonToast  
     },
     data: () => ({
         //Iconos
         cloudUploadOutline,
+        wifiOutline,
+        alertOutline,
+        checkmarkOutline,
 
         id_Unidad: '',
         id_Usuario: '',
@@ -107,15 +165,22 @@ export default {
         modelo: '',
         imagen: null,
         imagenPreview: null,
+
+        isLoading: false,
+        isErrorVehiculo: false,
+        ShowAlertLimite: false,
+        showModalConfirm: false,
     }),
 
-    created() {
-        var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario');
-        if(!SessionValid)
-            this.$router.push('/login')
+    async created() {
+        await this.cargarDatos();
     },
 
     methods: {
+        async cargarDatos(){
+            var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario');
+            if(!SessionValid) this.$router.push('/login')
+        },
         handleFileChange(event) {
             const file = event.target.files[0];
             if (file) {
@@ -155,39 +220,55 @@ export default {
                 // Muestra el mensaje de error
                 alert("Error: \n" + errorMessage);
             } else {
-                const imagenBase64 = await this.getBase64Image();
+                try{
+                    this.isLoading = true;
+                    this.isErrorVehiculo = false;
+                    const imagenBase64 = await this.getBase64Image();
 
-                function generateGuid() {
-                    let d = Date.now();
-                    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-                        d += performance.now(); // Agregar tiempo de alta resolución si está disponible
+                    const nuevoVehiculo = {
+                        Id_Unidad: this.generateGuid(),
+                        Id_Usuario: this.$cookies.get('Usuario'),
+                        Color: this.color,
+                        Placa: this.placa,
+                        Imagen: imagenBase64,
+                        Modelo: this.modelo
+                    };
+
+                    const limiteCarro = await VehiculoService.getVehiculosByUsuario(this.$cookies.get('Usuario'))
+                    var data = JSON.parse(JSON.stringify(limiteCarro.data));
+                    if(data.length == 2){
+                        this.isLoading = false;
+                        this.ShowAlertLimite = true;
+                        return;
                     }
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        const r = (d + Math.random() * 16) % 16 | 0;
-                        d = Math.floor(d / 16);
-                        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-                    });
-                };
 
-                const nuevoVehiculo = {
-                    Id_Unidad: generateGuid(), //this.id_Unidad,
-                    Id_Usuario: this.$cookies.get('Usuario'),
-                    Color: this.color,
-                    Placa: this.placa,
-                    Imagen: imagenBase64,
-                    Modelo: this.modelo
-                };
-                
-                const response = await VehiculoService.registerVehiculo(nuevoVehiculo)
+                    const response = await VehiculoService.registerVehiculo(nuevoVehiculo)
 
-                if(response.status == 201 || response.status == 200){
-                    alert("Registro Exitoso")
-                    this.limpiarFormulario()
-                    //this.$router.push('/home')
-                }else{
-                    alert("No se pudo registrar el vehiculo")
+                    setTimeout(() => {
+                        if(response.status == 201 || response.status == 200){
+                            this.isLoading = false;
+                            this.showModalConfirm = true;
+                            this.limpiarFormulario()
+                        }
+                    }, 3000);
+                    
+                }catch(error){
+                    this.isLoading = false;
+                    this.isErrorVehiculo = true;
                 }
             }
+        },
+
+        generateGuid() {
+            let d = Date.now();
+            if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+                d += performance.now(); // Agregar tiempo de alta resolución si está disponible
+            }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
         },
 
         limpiarFormulario() {
@@ -296,6 +377,21 @@ ion-item {
     display: flex;
     justify-content: center;
     align-content: center;
+}
+
+ion-modal {
+  --width: fit-content;
+  --height: fit-content;
+  --border-radius: 10px;
+}
+
+.bodyModal {
+  padding: 10px;
+  text-align: center;
+}
+
+.bodyModal ion-icon {
+  font-size: 36px;
 }
 </style>
     

@@ -94,9 +94,9 @@
       <!-- Modal de confirmación de eliminar unidad -->
       <ion-modal ref="modal" :is-open="showModalConfirmDelete">
         <div class="bodyModal">
-            <h2>Cancelar Reservación</h2>
+            <h2>Eliminar Vehiculo</h2>
             <ion-icon :icon="trashOutline" color="danger"></ion-icon>
-            <h3>Estar por cancelar tu reservación<br>¿Estas seguro?</h3>
+            <h3>Estar por eliminar tu vehiculo<br>¿Estas seguro?</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -148,6 +148,17 @@
         </div>
       </ion-modal>
 
+      <!-- Totas de error en la api invalidas -->
+      <ion-toast 
+        position="top" 
+        position-anchor="header" 
+        message="Ocurrio un error intenta mas tarde."
+        :is-open="isErrorPerfil"
+        color="danger"
+        :duration="2000"
+        :icon="wifiOutline"
+      ></ion-toast>
+
     </ion-page>
   </template>
   
@@ -164,7 +175,7 @@ import {
 //Iconos
 import { 
   callOutline, mailOutline, schoolOutline, idCardOutline, todayOutline, createOutline, exitOutline,
-  trashOutline, carOutline, sadOutline, closeOutline, checkmarkOutline, addCircleOutline
+  trashOutline, carOutline, sadOutline, closeOutline, checkmarkOutline, addCircleOutline, wifiOutline
 } from 'ionicons/icons'
 //Servicios
 import UsuarioService from '../Services/UsuarioService'
@@ -191,7 +202,9 @@ export default {
     closeOutline,
     checkmarkOutline,
     addCircleOutline,
+    wifiOutline,
 
+    isErrorPerfil: false,
     showModalConfirm: false,
     showModalConfirmDelete: false,
     showModalSuccess: false,
@@ -209,17 +222,22 @@ export default {
 
   methods: {
     async cargarDatos(){
-      var SesionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
-      if(SesionValid){
-        const response = await UsuarioService.getUserInfo(this.$cookies.get('Usuario'))
-        const responseV = await VehiculoService.getVehiculosByUsuario(this.$cookies.get('Usuario'))
-        this.datosP = JSON.parse(JSON.stringify(response.data))
-        this.usuario = JSON.parse(JSON.stringify(response.data.usuarios))
-        this.vehiculos = JSON.parse(JSON.stringify(responseV.data))
-        this.showModalConfirm = false;
-      }else{
-        this.$router.push('/login')
-      } 
+      try{
+        var SesionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
+        if(SesionValid){
+          const response = await UsuarioService.getUserInfo(this.$cookies.get('Usuario'))
+          const responseV = await VehiculoService.getVehiculosByUsuario(this.$cookies.get('Usuario'))
+          this.datosP = JSON.parse(JSON.stringify(response.data))
+          this.usuario = JSON.parse(JSON.stringify(response.data.usuarios))
+          this.vehiculos = JSON.parse(JSON.stringify(responseV.data))
+          this.showModalConfirm = false;
+        }else{
+          this.$router.push('/login')
+        }
+      }catch(error){
+        this.isErrorPerfil = true;
+      }
+       
     },
 
     cerrarSesion() {

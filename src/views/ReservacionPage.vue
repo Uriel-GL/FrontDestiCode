@@ -307,7 +307,6 @@ export default {
         }
       }, 3000);
 
-      console.log(cancelacion)
     }
   },
 
