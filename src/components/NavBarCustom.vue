@@ -8,10 +8,10 @@
 
 <script>
 //Componentes
-import { IonPage, IonHeader, IonToolbar } from '@ionic/vue'
+import { IonPage, IonHeader, IonToolbar, IonTitle } from '@ionic/vue'
 export default {
     components: {
-        IonPage, IonHeader, IonToolbar
+        IonPage, IonHeader, IonToolbar, IonTitle
     },
 
     props: ['title'],

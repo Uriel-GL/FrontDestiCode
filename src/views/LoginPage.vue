@@ -1,138 +1,234 @@
 <template>
     <ion-page>
+      <app-bar-custom title="DestiCode"></app-bar-custom>
+
       <ion-content class="ion-padding">
+        <!-- Totas de credenciales invalidas -->
+        <ion-toast 
+          position="top" 
+          position-anchor="header" 
+          message="Credenciales Invalidas."
+          :is-open="isErrorLogin"
+          color="danger"
+          :duration="2000"
+          :icon="closeCircleOutline"
+        ></ion-toast>
+
+        <!-- Totas de error de conexion -->
+        <ion-toast 
+          position="top" 
+          position-anchor="header" 
+          message="Ocurrio un error al intentar conectar con el servidor, intenta mas tarde."
+          :is-open="isErrorConnection"
+          color="danger"
+          :duration="2000"
+          :icon="wifiOutline"
+        ></ion-toast>
+
         <ion-card class="ion-card-small">
-          <!-- Agregamos una imagen arriba del formulario -->
+          <ion-card-header>
+            <ion-card-title>Bienvenido</ion-card-title>
+            <ion-card-subtitle>Ingresa tu Email y contraseña</ion-card-subtitle>
+          </ion-card-header>
           <img
-            src="https://png.pngtree.com/png-vector/20191110/ourlarge/pngtree-avatar-icon-profile-icon-member-login-vector-isolated-png-image_1978396.jpg"
-            alt="Login Image" class="login-image" />
+            src="https://firebasestorage.googleapis.com/v0/b/tiendaservicios-b7281.appspot.com/o/Imagenes%2FLogo.jpg?alt=media&token=045bb3d8-886b-4b6e-af3d-1c55197c9594"
+            class="login-image" />
+
           <ion-card-content>
-            <ion-list>
-              <ion-item class="rounded-item">
-                <ion-label class="custom-label">Usuario</ion-label>
-                <ion-input v-model="usuario" type="text" required class="custom-input"></ion-input>
-              </ion-item>
-  
-              <ion-item class="rounded-item">
-                <ion-label class="custom-label">Contraseña</ion-label>
-                <ion-input v-model="contrasena" type="password" required class="custom-input"></ion-input>
-              </ion-item>
-  
-              <ion-button expand="full" @click="iniciarSesion" class="custom-button">Iniciar Sesión</ion-button>
-  
-              <ion-button expand="full" @click="registrarUsuario" class="custom-button">Registrate Aquí</ion-button>
-  
-            </ion-list>
+            <ion-grid>
+              <ion-row>
+
+                <ion-col size="12">
+                  <ion-input v-model="usuario" 
+                  label="Email" fill="outline" 
+                  :color="validateEmail(usuario)"
+                  @ionBlur="onInputBlur"
+                  label-placement="floating" 
+                  placeholder="Ingresa tu correo" 
+                  type="email" 
+                  required>
+                  </ion-input>
+                  <span v-if="!isValidCorreo && inputTouchedCorreo"><ion-text color="danger">Correo Invalido</ion-text></span>
+                </ion-col>
+
+                <ion-col size="12">
+                  <ion-input v-model="contrasena" 
+                  :color="valiteContra(contrasena)" 
+                  label="Contraseña" 
+                  type="password"
+                  @ionBlur="onInputPass" 
+                  label-placement="floating" 
+                  required placeholder="Ingresa tu contraseña" 
+                  fill="outline">
+                  </ion-input>
+                  <span v-if="!isValidContra && inputTouchedContra"><ion-text color="danger">Contraseña Invalida</ion-text></span>
+                </ion-col>
+
+                <ion-col>
+                  <ion-tex>
+                    <a href="/recuperar-contra">¿Olvidaste tu contraseña?</a>
+                  </ion-tex>
+                </ion-col>
+
+                <ion-col size="12">
+                  <ion-button expand="full" shape="round" @click="iniciarSesion">
+                    Inciar Sesión
+                  </ion-button>
+                </ion-col>
+
+                <ion-col size="12" style="text-align: center;">
+                  <ion-text>¿No tienes Cuenta?</ion-text>
+                  <ion-button expand="full" @click="registrarUsuario" shape="round" fill="outline">Registrate Aquí</ion-button>
+                </ion-col>
+
+              </ion-row>
+            </ion-grid>
           </ion-card-content>
         </ion-card>
       </ion-content>
     </ion-page>
   </template>
   
-  <script>
-  
-  import { IonInput, IonButton, IonToast, IonPage } from '@ionic/vue';
-  import { ref } from 'vue';
-  //Servicios 
-  import AuthService from '../Services/AuthService'
-  export default {
-    components: { IonInput, IonButton, IonToast, IonPage },
-    name: 'Home',
-    data: () => ({
-      usuario: '',
-      contrasena: '',
-      mostrarToastError: false,
-    }),
-    methods: {
-      async iniciarSesion() {
-        let errorMessage = "";
-  
-        if (!this.usuario) {
-          errorMessage += "Por favor, ingrese el usuario.\n";
-        }
-  
-        if (!this.contrasena) {
-          errorMessage += "Por favor, ingrese la contraseña.\n";
-        }
-  
-        if (errorMessage) {
-          // Muestra el mensaje de error
-          alert("Error: \n" + errorMessage);
-        } else {
-          // lógica para verificar las credenciales del usuario.
-          var credenciales = { Correo: this.usuario, Contrasenia: this.contrasena }
-          const response = await AuthService.login(credenciales)
-          if(response.status == 200 || response.status == 201){
-            this.$cookies.set('AccessToken', response.data.token, { expires: 1 });
-            this.$cookies.set('Usuario', response.data.usuario, { expires: 1 });
-            this.$router.push('/home')
-          }
-        }
-      },
-  
-      registrarUsuario() {
-        this.$router.push("/registro")
+<script>
+//Componentes
+import AppBarCustom from '../components/NavBarCustom.vue'
+//Ionic
+import { 
+  IonInput, IonButton, IonToast, IonPage, IonCard, IonCardHeader, IonCardContent 
+} from '@ionic/vue';
+//Iconos
+import { closeCircleOutline, wifiOutline } from 'ionicons/icons'
+//Servicios 
+import AuthService from '../Services/AuthService'
+
+export default {
+  components: { 
+    AppBarCustom,
+    IonInput, IonButton, IonToast, IonPage,IonCard, IonCardHeader, IonCardContent 
+  },
+  name: 'Home',
+  data: () => ({
+    //Iconos
+    closeCircleOutline,
+    wifiOutline,
+
+    usuario: '',
+    contrasena: '',
+
+    mostrarToastError: false,
+    isErrorLogin: false,
+    isErrorConnection: false,
+    isValidCorreo: false,
+    isValidContra: false,
+    inputTouchedCorreo: false,
+    inputTouchedContra: false,
+    
+      
+  }),
+
+  methods: {
+    onInputBlur(){
+      this.inputTouchedCorreo = true;  
+    },
+
+    onInputPass(){
+      this.inputTouchedContra = true;
+    },
+
+    validateEmail(email) {
+      var data = email.match(
+        /^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+      );
+
+      this.isValidCorreo = !!data;
+
+      if(this.isValidCorreo){
+        return 'success'
+      }else{
+        return 'danger'
       }
     },
-  };
-  </script>
+
+    valiteContra(pass){
+      var data = pass.length >= 3;
+
+      this.isValidContra = data;
+
+      if(this.isValidContra){
+        return 'success'
+      }else{
+        return 'danger'
+      }
+    },
+
+    async iniciarSesion() {
+      try{
+        if(!this.isValidCorreo && !this.isValidContra) return;
+        
+        this.isErrorLogin = false;
+        this.isErrorConnection = false;
+
+        var credenciales = { Correo: this.usuario, Contrasenia: this.contrasena }
+        const response = await AuthService.login(credenciales)
+
+        if(response.status == 200 || response.status == 201){
+          this.$cookies.set('AccessToken', response.data.token, { expires: 1 });
+          this.$cookies.set('Usuario', response.data.usuario, { expires: 1 });
+          this.isValidCorreo = false;
+          this.isValidContra = false;
+          this.usuario = '';
+          this.contrasena = '';
+          this.$router.push('/home')
+        }else{
+          this.isErrorLogin = true;
+        }
+      }
+      catch(error){
+        if(error.message.includes('Network Error')){
+          this.isErrorConnection = true;
+        }else {
+            console.error('Error desconocido:', error);
+        }
+      }
+    },
+  
+    registrarUsuario() {
+      this.$router.push("/registro")
+    },
+
+    validarForm(){
+      const expresionRegularCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      this.CorreoValido = expresionRegularCorreo.test(this.usuario);
+      this.ContraValida = this.contrasena.length > 3 
+    }
+  },
+
+};
+</script>
   
   <style scoped>
   .ion-card-small {
     max-width: 400px;
     margin: 0 auto;
   }
-  
-  ion-card {
-    margin: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+
+  a{
+    text-decoration: none;
+  }
+
+  .ion-card-small ion-card-header {
+    text-align: center;
   }
   
   ion-button {
     margin-top: 10px;
   }
   
-  ion-item.rounded-item {
-    border-radius: 10px;
-    margin-bottom: 10px;
-  }
-  
-  ion-label.custom-label {
-    width: 40%;
-    text-align: right;
-    margin-right: 20px;
-  }
-  
-  ion-input.custom-input {
-    width: 60%;
-    border-radius: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border: 2px solid #ccc;
-  }
-  
-  .custom-button {
-    border-radius: 10px;
-    --color: #F5FCCD;
-    --background: #034561;
-    font-size: 14px;
-    padding: 8px 16px;
-  }
-  
   .login-image {
     display: block;
     margin: 0 auto;
     max-width: 150px;
-    height: 150px;
-    border-radius: 100px;
-  }
-  
-  ion-item {
-    --border-width: 0;
-    /* Elimina el borde */
-    --inner-border-width: 0;
-    /* Elimina el borde interno */
+    height: 100px;
+    /* border-radius: 100px; */
   }
   </style>

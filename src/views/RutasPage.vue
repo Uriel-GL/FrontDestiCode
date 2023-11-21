@@ -101,12 +101,12 @@
                   </ion-col>
                   <ion-col size="11">
                     <ion-select v-model="nuevaRuta.Id_Unidad" interface="popover" placeholder="Selecciona un Vehículo" 
-                    fill="outline" color="success" @ionChange="RegisterVehiculo">
+                    fill="outline" color="success" @ionChange="goToRegister">
                       <ion-select-option v-for="car in vehiculo" :key="car.id_Unidad" color="success" 
                       :value="car.id_Unidad">
                         {{ car.modelo }}
                       </ion-select-option>
-                      <ion-select-option v-if="vehiculo.length < 2">Registrar</ion-select-option>
+                      <ion-select-option v-if="vehiculo.length < 2" value="null">Registrar</ion-select-option>
                     </ion-select>
                   </ion-col>
                 </ion-row>
@@ -164,6 +164,35 @@
         </ion-grid>
       </div>
     </ion-modal>
+
+    <!-- Modal de alerta de registro de tu ruta -->
+    <ion-modal ref="modal" :is-open="ShowAlertLimite">
+      <div class="bodyModal">
+        <h2>Advertencia</h2>
+        <ion-icon :icon="alertOutline" color="warning"></ion-icon>
+        <h3>Solo puedes publicar 2 rutas y actualmente excedes el limite, borra una para continuar </h3>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-button @click="ShowAlertLimite = false" shape="round" color="success">
+                Confirmar
+              </ion-button>
+            </ion-col>     
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-modal>
+
+    <!-- Totas de error en la api invalidas -->
+    <ion-toast 
+      position="top" 
+      position-anchor="header" 
+      message="Ocurrio un error intenta mas tarde."
+      :is-open="isErrorRuta"
+      color="danger"
+      :duration="2000"
+      :icon="wifiOutline"
+    ></ion-toast>
   
   </ion-page>
 </template>
@@ -177,10 +206,13 @@ import 'vue-loading-overlay/dist/css/index.css';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonInput, IonGrid, IonRow, IonCol,
   IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonDatetimeButton, IonModal, IonDatetime, IonLabel,
-  IonItem, IonIcon, IonSelect, IonSelectOption,IonButton, IonPopover,
+  IonItem, IonIcon, IonSelect, IonSelectOption,IonButton, IonPopover, IonToast
 } from '@ionic/vue'
 //Iconos
-import { location, cashOutline, timeOutline, carOutline, manOutline, checkmarkOutline } from 'ionicons/icons'
+import { 
+  location, cashOutline, timeOutline, carOutline, manOutline, checkmarkOutline, wifiOutline,
+  alertOutline
+} from 'ionicons/icons'
 //Servicios 
 import VehiculoService from '../Services/VehiculoService'
 import RutaService from '@/Services/RutaService';
@@ -189,7 +221,7 @@ export default {
     AppBarCustom,Loading,
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonInput, IonGrid, IonRow, IonCol,
     IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonDatetimeButton, IonModal, IonDatetime,
-    IonLabel, IonItem, IonIcon, IonSelect, IonSelectOption, IonButton, IonPopover,
+    IonLabel, IonItem, IonIcon, IonSelect, IonSelectOption, IonButton, IonPopover, IonToast
   },
   
   data: () => ({
@@ -200,6 +232,8 @@ export default {
     carOutline,
     manOutline,
     checkmarkOutline,
+    wifiOutline,
+    alertOutline,
 
     //Variables
     showModal: false,
@@ -218,6 +252,8 @@ export default {
       Lugares_Disponibles: 0,  
       Estatus: true  
     },
+    ShowAlertLimite: false,
+    isErrorRuta: false,
   }),
 
   async created() {
@@ -238,25 +274,42 @@ export default {
     },
 
     async publicarRuta(){
-      this.showModal = false
-      this.isLoading = true
+      try{
+        this.isErrorRuta = false;
+        this.showModal = false
+        this.isLoading = true
 
-      var costo = parseFloat(this.nuevaRuta.Costo.trim())
-      var lugares = parseInt(this.nuevaRuta.Lugares_Disponibles, 10)
-
-      this.nuevaRuta.Costo = costo
-      this.nuevaRuta.Lugares_Disponibles = lugares
-      this.nuevaRuta.Id_Usuario = this.$cookies.get('Usuario')
-
-      const response = await RutaService.registerRuta(this.nuevaRuta)
-
-      setTimeout(() => {
-        this.isLoading = false
-        if(response.status == 201 || response.status == 200){
-          this.limpiarFormulario()
-          this.showModalConfirm = true;
+        const limiteRegistro = await RutaService.getRutaByIdUsuario(this.$cookies.get('Usuario'));
+        var data = JSON.parse(JSON.stringify(limiteRegistro.data))
+        
+        if(data.length == 2){
+          this.isLoading = false;
+          this.ShowAlertLimite = true;
+          return;
         }
-      }, 4000);
+
+        var costo = parseFloat(this.nuevaRuta.Costo)
+        var lugares = parseInt(this.nuevaRuta.Lugares_Disponibles, 10)
+
+        this.nuevaRuta.Costo = costo
+        this.nuevaRuta.Lugares_Disponibles = lugares
+        this.nuevaRuta.Id_Usuario = this.$cookies.get('Usuario')
+
+        const response = await RutaService.registerRuta(this.nuevaRuta)
+
+        setTimeout(() => {
+          this.isLoading = false
+          if(response.status == 201 || response.status == 200){
+            this.limpiarFormulario()
+            this.showModalConfirm = true;
+          }
+        }, 4000);
+
+      }catch(error){
+        this.isLoading = false;
+        this.isErrorRuta = true;
+      }
+        
     },
 
     limpiarFormulario(){
@@ -274,7 +327,10 @@ export default {
     },
     
     goToRegister() {
-      this.$router.push('/vehiculos')
+      if(this.nuevaRuta.Id_Unidad == "null"){
+        this.$router.push('/vehiculos')
+        this.nuevaRuta.Id_Unidad = '';
+      }
     },
 
   }

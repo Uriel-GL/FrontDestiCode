@@ -3,14 +3,13 @@ import HomePage from '../views/HomePage.vue';
 import RegistroPage from '../views/RegistroPage.vue';
 import VehiculoPage from '../views/VehiculosPage.vue';
 import ActualizarVehiculoPage from '../views/ActualiVehiculoPage.vue';
-
 import TabBarComponent from '../components/tabBarComponent.vue'
-
 import Publicaciones from '../views/RutasPage.vue';
 import Reservaciones from '../views/ReservacionPage.vue';
 import Perfil from '../views/PerfilPage.vue';
 import RutaDetalle from '../views/DetalleRutaPage.vue';
 import Login from '../views/LoginPage.vue';
+import RecuperarContra from '../views/RecuperarContra.vue'
 
 const routes = [
   {
@@ -71,6 +70,11 @@ const routes = [
     name: 'ActualizarVehiculo',
     component: ActualizarVehiculoPage
   },
+  {
+    path: '/recuperar-contra',
+    name: 'Recuperar Contraseña',
+    component: RecuperarContra
+  }
 ]
 
 const router = createRouter({
