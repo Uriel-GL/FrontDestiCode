@@ -1,219 +1,386 @@
 <template>
-    <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Crear Ruta</ion-title>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content class="ion-padding">
-            <ion-card class="ion-card-small">
-                <ion-card-content>
-                    <ion-list>
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Lugar de Origen</ion-label>
-                            <ion-select label="Lugar de Origen" label-placement="fixed" v-model="lugarSalida">
-                                <ion-select-option value="Origen1">Origen 1</ion-select-option>
-                                <ion-select-option value="Origen2">Origen 2</ion-select-option>
-                            </ion-select>
-                        </ion-item>
+  <ion-page>
+    <app-bar-custom title="Publicar"></app-bar-custom>
+    <loading :active="isLoading" :can-cancel="false" :is-full-page="fullPage" />
+  
+    <ion-content class="ion-padding">
+      <div class="bodyContent">
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Lugar de Destino</ion-label>
-                            <ion-select label="Lugar de Destino" label-placement="fixed" v-model="lugarDestino">
-                                <ion-select-option value="Destino1">Destino 1</ion-select-option>
-                                <ion-select-option value="Destino2">Destino 2</ion-select-option>
-                            </ion-select>
-                        </ion-item>
+        <ion-card v-if="this.vehiculo.length == 0">
+          <ion-card-header>
+            <ion-card-title color="danger"><b>Advertencia</b></ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-icon class="carIcon" :icon="carOutline"></ion-icon>
+            <h1>Actualmente no cuentas con un vehiculo registrado</h1>
+            <br>
+            <h2>Registra uno si quieres publicar una ruta</h2>
+            <br>
+            <ion-button shape="round" color="success" @click="goToRegister">Registrar Vehiculo</ion-button>
+          </ion-card-content>
+        </ion-card>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Número de Pasajeros</ion-label>
-                            <ion-button fill="solid" color="primary" @click="decrementPasajeros">
-                                <ion-icon name="remove-circle-outline" size="large"></ion-icon>
-                            </ion-button>
-                            <ion-input type="number" v-model="luagresDisponibles" min="0" max="99" step="1"
-                                class="custom-input custom-input-border-color-1"></ion-input>
-                            <ion-button fill="solid" color="primary" @click="incrementPasajeros">
-                                <ion-icon name="add-circle-outline" size="large"></ion-icon>
-                            </ion-button>
-                        </ion-item>
+        <ion-card v-if="this.vehiculo.length > 0" class="cardPubli">
+          <ion-card-header>
+            <ion-card-title>Publica tu Ruta</ion-card-title>
+            <ion-card-subtitle>Ingresa los datos</ion-card-subtitle>
+          </ion-card-header>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Fecha y Hora de Salida</ion-label>
-                            <ion-datetime-button datetime="datetime" v-model="fechaSalida"
-                                class="custom-button"></ion-datetime-button>
-                            <ion-modal :keep-contents-mounted="true">
-                                <ion-datetime id="datetime"></ion-datetime>
-                            </ion-modal>
-                        </ion-item>
+          <ion-card-content>
+            <div class="bodyPublicacion">
+              <ion-grid>
+                <ion-row>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Costo</ion-label>
-                            <ion-input type="number" v-model="costo" min="0" step="0.01"
-                                class="custom-input custom-input-border-color-2"></ion-input>
-                        </ion-item>
+                  <ion-col class="iconCash" size="1">
+                    <ion-icon :icon="location"></ion-icon>
+                  </ion-col>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Selecciona la Unidad</ion-label>
-                            <ion-label class="custom-label">Selecciona la Unidad</ion-label>
-                            <ion-select label="Selecciona la Unidad" label-placement="fixed" v-model="idUnidad">
-                                <ion-select-option v-for="unidad in unidades" :key="unidad.id" :value="unidad.id">
-                                    {{ unidad.nombre }}
-                                </ion-select-option>
-                            </ion-select>
-                        </ion-item>
+                  <ion-col size="11">
+                    <ion-input v-model="nuevaRuta.Lugar_Salida" label="Origen" label-placement="floating" 
+                    placeholder="¿De dónde sales?" fill="outline" color="success" />
+                  </ion-col>
 
-                        <ion-button expand="full" @click="crearRuta" class="custom-button">Crear Ruta</ion-button>
-                    </ion-list>
-                </ion-card-content>
-            </ion-card>
-        </ion-content>
-    </ion-page>
+                  <ion-col class="iconCash" size="1">
+                    <ion-icon :icon="location"></ion-icon>
+                  </ion-col>
+
+                  <ion-col size="11">
+                    <ion-input v-model="nuevaRuta.Lugar_Destino" label="Destino" label-placement="floating" 
+                    placeholder="¿A dónde viajas?" fill="outline" color="success"/>
+                  </ion-col>
+
+                  <ion-col class="iconCash" size="1">
+                    <ion-icon :icon="timeOutline"></ion-icon>
+                  </ion-col>
+
+                  <ion-col size="11">
+                    <ion-item>
+                      <ion-label>Fecha y Hora de <br> salida</ion-label>
+                      <ion-input :value="nuevaRuta.Fecha_Salida" 
+                        class="ion-text-end" id="date" />
+                        <ion-popover trigger="date" size="auto">
+                          <ion-content>
+                            <ion-datetime v-model="nuevaRuta.Fecha_Salida" display-format="DD/MM/YYYY HH:mm"></ion-datetime>
+                          </ion-content>
+                        </ion-popover>
+                    </ion-item>
+                  </ion-col>
+
+                  <ion-col class="iconCash" size="1">
+                    <ion-icon :icon="manOutline"></ion-icon>
+                  </ion-col>
+
+                  <ion-col size="11">
+                    <ion-input type="number" v-model="nuevaRuta.Lugares_Disponibles" label="Espacios Disponibles" color="success" 
+                    label-placement="floating" placeholder="Ingresa una cantidad" 
+                    fill="outline">
+                    </ion-input>
+                  </ion-col>
+
+                  <ion-col class="iconCash" size="1">
+                    <ion-icon :icon="cashOutline"></ion-icon>
+                  </ion-col>
+
+                  <ion-col size="11">
+                    <ion-input v-model="nuevaRuta.Costo" label="Costo por Persona" color="success" 
+                    label-placement="floating" placeholder="Ingresa un monto" 
+                    fill="outline">
+                    </ion-input>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+
+              <br>
+              <ion-card-title>¿Que vehículo utilizaras?</ion-card-title>
+              <ion-card-subtitle>Seleccionalo</ion-card-subtitle>
+
+              <ion-grid>
+                <ion-row>
+                  <ion-col class="iconCash" size="1">
+                    <ion-icon :icon="carOutline"></ion-icon>
+                  </ion-col>
+                  <ion-col size="11">
+                    <ion-select v-model="nuevaRuta.Id_Unidad" interface="popover" placeholder="Selecciona un Vehículo" 
+                    fill="outline" color="success" @ionChange="goToRegister">
+                      <ion-select-option v-for="car in vehiculo" :key="car.id_Unidad" color="success" 
+                      :value="car.id_Unidad">
+                        {{ car.modelo }}
+                      </ion-select-option>
+                      <ion-select-option v-if="vehiculo.length < 2" value="null">Registrar</ion-select-option>
+                    </ion-select>
+                  </ion-col>
+                </ion-row>
+
+                <ion-row><ion-col></ion-col></ion-row>
+
+                <ion-row>
+                  <ion-col size="12">
+                    <ion-button @click="showModal = true" color="success" shape="round" expand="full">
+                      Publicar
+                    </ion-button>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </ion-content>
+
+    <!-- Modal de confirmación de publicación -->
+    <ion-modal ref="modal" :is-open="showModal">
+      <div class="bodyModal">
+        <h2>¿Estás seguro de publicar tu ruta?</h2>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-button @click="showModal = false" color="danger" fill="clear">
+                Cancelar
+              </ion-button>
+              <ion-button @click="publicarRuta" shape="round" color="success">
+                Confirmar
+              </ion-button>
+            </ion-col>     
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-modal>
+
+    <!-- Modal de confirmación de registro de tu ruta -->
+    <ion-modal ref="modal" :is-open="showModalConfirm">
+      <div class="bodyModal">
+        <h2>Registro Exitoso</h2>
+        <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
+        <h3>Tu ruta ahora se encuentra publicada</h3>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-button @click="showModalConfirm = false" shape="round" color="success">
+                Confirmar
+              </ion-button>
+            </ion-col>     
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-modal>
+
+    <!-- Modal de alerta de registro de tu ruta -->
+    <ion-modal ref="modal" :is-open="ShowAlertLimite">
+      <div class="bodyModal">
+        <h2>Advertencia</h2>
+        <ion-icon :icon="alertOutline" color="warning"></ion-icon>
+        <h3>Solo puedes publicar 2 rutas y actualmente excedes el limite, borra una para continuar </h3>
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-button @click="ShowAlertLimite = false" shape="round" color="success">
+                Confirmar
+              </ion-button>
+            </ion-col>     
+          </ion-row>
+        </ion-grid>
+      </div>
+    </ion-modal>
+
+    <!-- Totas de error en la api invalidas -->
+    <ion-toast 
+      position="top" 
+      position-anchor="header" 
+      message="Ocurrio un error intenta mas tarde."
+      :is-open="isErrorRuta"
+      color="danger"
+      :duration="2000"
+      :icon="wifiOutline"
+    ></ion-toast>
+  
+  </ion-page>
 </template>
   
 <script>
-import { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonSelect, IonSelectOption } from '@ionic/vue';
-import { ref } from 'vue';
-
+//Componentes
+import AppBarCustom from '../components/NavBarCustom.vue'
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/css/index.css';
+//Ionic
+import { 
+  IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonInput, IonGrid, IonRow, IonCol,
+  IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonDatetimeButton, IonModal, IonDatetime, IonLabel,
+  IonItem, IonIcon, IonSelect, IonSelectOption,IonButton, IonPopover, IonToast
+} from '@ionic/vue'
+//Iconos
+import { 
+  location, cashOutline, timeOutline, carOutline, manOutline, checkmarkOutline, wifiOutline,
+  alertOutline
+} from 'ionicons/icons'
+//Servicios 
+import VehiculoService from '../Services/VehiculoService'
+import RutaService from '@/Services/RutaService';
 export default {
-    components: { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonSelect, IonSelectOption },
-    name: 'RegistroRutas',
-    data() {
-        return {
-            lugarSalida: '',
-            lugarDestino: '',
-            luagresDisponibles: 0,
-            fechaSalida: '',
-            costo: 0,
-            idUsuario: '',
-            idUnidad: '',
-            estatus: '',
-            unidades: [],
+  components: {
+    AppBarCustom,Loading,
+    IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonInput, IonGrid, IonRow, IonCol,
+    IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonDatetimeButton, IonModal, IonDatetime,
+    IonLabel, IonItem, IonIcon, IonSelect, IonSelectOption, IonButton, IonPopover, IonToast
+  },
+  
+  data: () => ({
+    //Iconos
+    location, 
+    cashOutline, 
+    timeOutline,
+    carOutline,
+    manOutline,
+    checkmarkOutline,
+    wifiOutline,
+    alertOutline,
 
-        };
+    //Variables
+    showModal: false,
+    showModalConfirm: false,
+    isLoading: false,
+    fullPage: true,
+    vehiculo: [],
+    nuevaRuta: { 
+      Id_Ruta: '6c54d50b-2850-4081-8087-e1954c496a4c', //Guid de ejemplo para evitar problema de empty
+      Id_Unidad: '', 
+      Id_Usuario: '', 
+      Lugar_Salida: '', 
+      Lugar_Destino: '', 
+      Fecha_Salida: '', 
+      Costo: '', 
+      Lugares_Disponibles: 0,  
+      Estatus: true  
     },
-    onMounted() {
-        this.cargarUnidades(); // Llama a la función para cargar las unidades
+    ShowAlertLimite: false,
+    isErrorRuta: false,
+  }),
+
+  async created() {
+    await this.cargarDatos()
+  },
+
+  methods: {
+    async cargarDatos(){
+      var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
+      if(SessionValid){
+        var id = this.$cookies.get('Usuario')
+        const response = await VehiculoService.getVehiculosByUsuario(id)
+        this.vehiculo = JSON.parse(JSON.stringify(response.data))
+        console.log(this.vehiculo)
+      }else{
+        this.$router.push('login')
+      }
     },
-    methods: {
-        decrementPasajeros() {
-            if (this.luagresDisponibles > 0) {
-                this.luagresDisponibles--;
-            }
-        },
-        incrementPasajeros() {
-            this.luagresDisponibles++;
-        },
-        async cargarUnidades() {
-            // Aquí debes realizar una petición HTTP para obtener las unidades de la API
-            try {
-                const response = await fetch("URL_DE_TU_API/unidades");
-                if (response.ok) {
-                    // Si la respuesta es exitosa, convierte los datos JSON
-                    const data = await response.json();
-                    this.unidades = data; // Almacena las unidades en la variable "unidades"
-                } else {
-                    console.log("Error al obtener las unidades");
-                }
-            } catch (error) {
-                console.log("Error de red:", error);
-            }
-        },
-        crearRuta() {
-            let errorMessage = "";
 
-            if (!this.lugarSalida) {
-                errorMessage += "Por favor, selecciona el lugar de salida.\n";
-            }
+    async publicarRuta(){
+      try{
+        this.isErrorRuta = false;
+        this.showModal = false
+        this.isLoading = true
 
-            if (!this.lugarDestino) {
-                errorMessage += "Por favor, ingresa el lugar de destino.\n";
-            }
+        const limiteRegistro = await RutaService.getRutaByIdUsuario(this.$cookies.get('Usuario'));
+        var data = JSON.parse(JSON.stringify(limiteRegistro.data))
+        
+        if(data.length == 2){
+          this.isLoading = false;
+          this.ShowAlertLimite = true;
+          return;
+        }
 
-            if (!this.luagresDisponibles) {
-                errorMessage += "Por favor, ingresa el numro de lugares. \n"
-            }
+        var costo = parseFloat(this.nuevaRuta.Costo)
+        var lugares = parseInt(this.nuevaRuta.Lugares_Disponibles, 10)
 
-            if (!this.fechaSalida) {
-                errorMessage += "Por favor, ingrese la hora y fecha de salida. \n"
-            }
+        this.nuevaRuta.Costo = costo
+        this.nuevaRuta.Lugares_Disponibles = lugares
+        this.nuevaRuta.Id_Usuario = this.$cookies.get('Usuario')
 
-            if (!this.costo) {
-                errorMessage += "Por favor, ingrese el costo por pasaje."
-            }
+        const response = await RutaService.registerRuta(this.nuevaRuta)
 
-            if (errorMessage) {
-                // Muestra el mensaje de error
+        setTimeout(() => {
+          this.isLoading = false
+          if(response.status == 201 || response.status == 200){
+            this.limpiarFormulario()
+            this.showModalConfirm = true;
+          }
+        }, 4000);
 
-                alert("Error: \n" + errorMessage);
-            } else {
-                alert("Correcto")
-            }
-        },
+      }catch(error){
+        this.isLoading = false;
+        this.isErrorRuta = true;
+      }
+        
     },
-};
+
+    limpiarFormulario(){
+      this.nuevaRuta = { 
+        Id_Ruta: '6c54d50b-2850-4081-8087-e1954c496a4c',  
+        Id_Unidad: '',  
+        Id_Usuario: '', 
+        Lugar_Salida: '', 
+        Lugar_Destino: '', 
+        Fecha_Salida: '', 
+        Costo: '',  
+        Lugares_Disponibles: '',  
+        Estatus: true  
+      }
+    },
+    
+    goToRegister() {
+      if(this.nuevaRuta.Id_Unidad == "null"){
+        this.$router.push('/vehiculos')
+        this.nuevaRuta.Id_Unidad = '';
+      }
+    },
+
+  }
+}
 </script>
   
 <style scoped>
-.ion-card-small {
-    max-width: 700px;
-    margin: 0 auto;
+.custom-toast {
+  z-index: 10000;
+}
+ion-icon {
+  font-size: 26px;
+}
+
+.carIcon {
+  font-size: 46px;
 }
 
 ion-card {
-    margin: 10px;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-ion-button {
-    margin-top: 10px;
+ion-modal {
+  --width: fit-content;
+  --height: fit-content;
+  --border-radius: 10px;
 }
 
-ion-item.rounded-item {
-    border-radius: 10px;
-    margin-bottom: 10px;
+.bodyContent {
+  padding: 10px;
 }
 
-ion-label.custom-label {
-    width: 40%;
-    text-align: right;
-    margin-right: 20px;
+.bodyModal {
+  padding: 10px;
+  text-align: center;
 }
 
-ion-input.custom-input {
-    width: 60%;
-    border-radius: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border: 2px solid #ccc;
+.bodyModal ion-icon {
+  font-size: 36px;
 }
 
-ion-input.custom-input-border-color-1 {
-    border: 2px solid #F5FCCD;
+.cardPubli {
+  max-width: 450px;
+  margin: 0 auto;
 }
 
-ion-input.custom-input-border-color-2 {
-    border: 2px solid #4FB783;
-}
-
-.custom-button {
-    border-radius: 10px;
-    --color: #F5FCCD;
-    --background: #034561;
-    font-size: 14px;
-    padding: 8px 16px;
-}
-
-ion-item {
-    --border-width: 0;
-    /* Elimina el borde */
-    --inner-border-width: 0;
-    /* Elimina el borde interno */
-}
-
-ion-icon {
-    color: black;
+.iconCash{
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  margin-top: 15px;
 }
 </style>
-  

@@ -23,8 +23,12 @@ import '@ionic/vue/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 
+/* Vue3-Cookies */
+import VueCookies from 'vue-cookies';
+
 const app = createApp(App)
   .use(IonicVue)
+  .use(VueCookies)
   .use(router);
   
 router.isReady().then(() => {

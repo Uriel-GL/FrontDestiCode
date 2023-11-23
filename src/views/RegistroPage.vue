@@ -1,10 +1,7 @@
 <template>
     <ion-page>
-        <ion-header>
-            <ion-toolbar>
-                <ion-title>Registro de Usuarios</ion-title>
-            </ion-toolbar>
-        </ion-header>
+        <app-bar-custom title="Registro de Usuarios"></app-bar-custom>
+
         <ion-content class="ion-padding" v-if="!mostrarSegundoFormulario">
             <ion-card class="ion-card-small">
                 <ion-card-content>
@@ -132,34 +129,40 @@
   
 <script>
 import { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonPopover } from '@ionic/vue';
+//Componentes
+import AppBarCustom from '../components/NavBarCustom.vue'
+//Ionic
 import { ref } from 'vue';
-
+//Iconos
+//Servicios
 export default {
-    components: { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonPopover },
-    name: 'RegistroUsuario',
-    data() {
-        return {
-            nombreUsuario: '',
-            correo: '',
-            contrasenia: '',
-            fechaRegistro: '',
-            mostrarToastError: false,
-            showPassword: false,
-            showPassword2: false,
-            nombreCompleto: '',
-            fechaNacimiento: '',
-            matricula: '',
-            grupo: '',
-            universidad: '',
-            telefono: '',
-            estatus: '',
-            credencial: null,
-            credencialPreview: null,
-            mostrarSegundoFormulario: false,
-            registro: ''
+    components: { 
+        AppBarCustom,
+        IonPopover,
+        IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage 
 
-        };
     },
+    name: 'RegistroUsuario',
+
+    data: () => ({
+        nombreUsuario: '',
+        correo: '',
+        contrasenia: '',
+        fechaRegistro: '',
+        mostrarToastError: false,
+        showPassword: false,
+        nombreCompleto: '',
+        fechaNacimiento: '',
+        matricula: '',
+        grupo: '',
+        universidad: '',
+        telefono: '',
+        estatus: '',
+        credencial: null,
+        credencialPreview: null,
+        mostrarSegundoFormulario: false,
+        registro: '',
+    }),
     methods: {
         handleFileChange(event) {
             const file = event.target.files[0];
