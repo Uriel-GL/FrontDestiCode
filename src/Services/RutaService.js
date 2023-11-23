@@ -43,8 +43,8 @@ export default {
         return apiClient.post('/Rutas/CancelarLugar', cancelacion)
     },
 
-    eliminarRuta(){
-
+    eliminarRuta(Id_Ruta){
+        return apiClient.delete(`/Rutas/EliminarRuta/${Id_Ruta}`)
     }
 
 }
