@@ -107,7 +107,7 @@
                           <h4 v-if="ruta.lugares_Disponibles <= 0 && ruta.estatus == false" class="salida">
                             <b>Viaje Lleno</b>
                           </h4>
-                          <h3 class="salida">
+                          <h3 class="salida" v-else>
                             Lugares: 
                             <ion-text color="success"><b> {{ ruta.lugares_Disponibles }} </b></ion-text>
                           </h3>
@@ -121,6 +121,9 @@
                         <ion-button @click="VerSolicitantes(ruta.id_Ruta)" expand="full" :disabled="ruta.estatus == false" color="success"  class="btnViaje">
                           Ver Solicitudes
                         </ion-button>
+                        <ion-button @click="openModalConfirmDelete(ruta.id_Ruta)" :disabled="ruta.lugares_Disponibles >= 0 && ruta.estatus == true" expand="full" class="btnViaje" color="danger" fill="clear">
+                          Eliminar Ruta
+                        </ion-button>
                       </ion-card>
                     </ion-col>
                   </ion-row>
@@ -131,8 +134,83 @@
             </ion-card>
         </div>
 
+        <!-- Modal de personas que reservaron un lugar en tu ruta -->
+        <ion-modal class="modalReser" ref="modal" :is-open="showModalReservaciones">
+          <ion-header>
+            <ion-toolbar color="primary">
+              <ion-title>Personas que reservaron</ion-title>
+              <ion-buttons slot="end">
+                <ion-button @click="this.showModalReservaciones = false">
+                  <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content class="ion-padding">
+            <div v-if="Reservaciones.length == 0" style="text-align: center;">
+              <ion-icon :icon="personOutline" style="font-size: 36px;"></ion-icon>
+              <ion-icon :icon="arrowForwardOutline" style="font-size: 36px;" color="success"></ion-icon>
+              <ion-icon :icon="ticketOutline" style="font-size: 36px;"></ion-icon>
+              <h2>¡Tu ruta está lista para recibir reservaciones, pero por ahora está vacía!</h2>
+            </div>
+
+            <ion-list v-else>
+              <ion-item v-for="user in Reservaciones" :key="user.id_Usuario">
+                <ion-avatar slot="start">
+                  <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="">
+                </ion-avatar>
+                <ion-label>
+                  <h2>{{ user.nombre_Usuario }}</h2>
+                  <p>Grupo: {{ user.datosPersonales[0].grupo }}</p>
+                  <p>Telefono: {{ user.datosPersonales[0].telefono }}</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-content>
+        </ion-modal>
+
+        <!-- Modal de confirmación de eliminar ruta publicada -->
+        <ion-modal class="Modal" ref="modal" :is-open="showModalConfirmDelete">
+          <div class="bodyModal">
+            <h2>Eliminar Ruta</h2>
+            <ion-icon :icon="trashOutline" color="danger"></ion-icon>
+            <h3>Estar por eliminar tu ruta<br>¿Estas seguro?</h3>
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-button @click="showModalConfirmDelete = false" fill="clear" shape="round">
+                    Cancelar
+                  </ion-button>
+                  <ion-button @click="EliminarRuta" shape="round" color="success">
+                    Confirmar
+                  </ion-button>
+                </ion-col>     
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-modal>
+
+        <!-- Modal de confirmación de eliminación de ruta -->
+        <ion-modal class="Modal" ref="modal" :is-open="showModalSuccessDelete">
+          <div class="bodyModal">
+            <h2>Eliminación Exitosa</h2>
+            <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
+            <h3>Se elimino tu ruta.</h3>
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-button @click="showModalSuccessDelete = false" shape="round" color="success">
+                    Confirmar
+                  </ion-button>
+                </ion-col>     
+              </ion-row>
+            </ion-grid>
+          </div>
+        </ion-modal>
+
         <!-- Modal de confirmación de cancelar -->
-        <ion-modal ref="modal" :is-open="showModalConfirm">
+        <ion-modal class="Modal" ref="modal" :is-open="showModalConfirm">
           <div class="bodyModal">
             <h2>Cancelar Reservación</h2>
             <ion-icon :icon="trashOutline" color="danger"></ion-icon>
@@ -153,7 +231,7 @@
         </ion-modal>
 
         <!-- Modal de confirmación de cancelacion -->
-        <ion-modal ref="modal" :is-open="showModalSuccess">
+        <ion-modal class="Modal" ref="modal" :is-open="showModalSuccess">
           <div class="bodyModal">
             <h2>Cancelación Exitosa</h2>
             <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
@@ -171,7 +249,7 @@
         </ion-modal>
   
         <!-- Modal de error de actualización de tu vehiculo -->
-        <ion-modal ref="modal" :is-open="showModalError">
+        <ion-modal class="Modal" ref="modal" :is-open="showModalError">
           <div class="bodyModal">
             <h2>Error al reservar</h2>
             <ion-icon :icon="closeOutline" color="danger"></ion-icon>
@@ -187,6 +265,17 @@
             </ion-grid>
           </div>
         </ion-modal>
+
+        <!-- Totas de error en la api -->
+        <ion-toast 
+          position="top" 
+          position-anchor="header" 
+          message="Ocurrio un error intenta mas tarde."
+          :is-open="isErrorData"
+          color="danger"
+          :duration="3000"
+          :icon="wifiOutline"
+        ></ion-toast>
       </ion-content>
     </ion-page>
   </template>
@@ -198,11 +287,13 @@ import Loading from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardHeader, 
-  IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal
+  IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal, IonGrid, IonCol, IonRow,
+  IonText, IonButton, IonIcon, IonLabel, IonButtons, IonList, IonItem, IonAvatar, IonToast
 } from '@ionic/vue'
 //Iconos
 import { 
-  arrowDown, ticketOutline, carOutline, ellipse, trashOutline, checkmarkOutline, closeOutline
+  arrowDown, ticketOutline, carOutline, ellipse, trashOutline, checkmarkOutline, closeOutline,
+  personOutline, arrowForwardOutline, wifiOutline
 } from 'ionicons/icons'
 //Servicios
 import RutaService from '@/Services/RutaService'
@@ -211,25 +302,33 @@ export default {
   components: {
     AppBarCustom,Loading,
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardHeader, 
-    IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal
+    IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal, IonGrid, IonCol, IonRow,
+    IonText, IonButton, IonIcon, IonLabel, IonButtons, IonList, IonItem, IonAvatar, IonToast
   },
   
   data: () => ({
     //Iconos
+    arrowForwardOutline,
     arrowDown,
+    wifiOutline,
     ticketOutline,
     carOutline,
     ellipse,
     trashOutline,
     checkmarkOutline,
     closeOutline,
+    personOutline,
 
+    showModalConfirmDelete: false,
+    showModalSuccessDelete: false,
     showModalConfirm: false,
     showModalSuccess: false,
     showModalError: false,
+    showModalReservaciones: false,
     ShowTickets: false,
     isLoading: false,
     ShowRutas: false,  
+    isErrorData: false,
 
     TusTickets: [],
     TusRutas: [],
@@ -237,7 +336,7 @@ export default {
 
     idRuta: '',
     idReservacion: '',
-    numAsientos: 0
+    numAsientos: 0,
   }),
 
   async created() {
@@ -268,8 +367,24 @@ export default {
       this.ShowRutas = true;
     },
 
-    VerSolicitantes(Id_Ruta){
-      console.log(Id_Ruta)
+    async VerSolicitantes(Id_Ruta){
+      try{
+        this.showModalReservaciones = false;
+        const response = await RutaService.getUsuariosReservaronRuta(Id_Ruta);
+
+        if(response.status == 201 || response.status == 200){
+          this.Reservaciones = JSON.parse(JSON.stringify(response.data))
+          console.log(Id_Ruta)
+          console.log(response.data);
+          this.showModalReservaciones = true;
+        }else{
+          this.showModalReservaciones = false;
+          this.isErrorData = true;
+        }
+      }
+      catch(error){
+        console.log(error)
+      }
     },
 
     formatoFecha(date){
@@ -307,6 +422,30 @@ export default {
         }
       }, 3000);
 
+    },
+
+    openModalConfirmDelete(id_Ruta){
+      this.idRuta = id_Ruta;
+
+      this.showModalConfirmDelete = true;
+    },
+
+    async EliminarRuta(){
+      try{
+        this.showModalConfirmDelete = false;
+        this.isLoading = true;
+        //const response = await RutaService.EliminarRuta(this.idRuta);
+
+        setTimeout(() => {
+          if(true/*response.status == 201 || response.status == 200*/){
+            this.isLoading = false;
+            this.showModalSuccessDelete = true;
+          }
+        }, 3000);
+      }
+      catch(error){
+        this.isErrorData = true;
+      }
     }
   },
 
@@ -438,11 +577,12 @@ ion-card-subtitle{
   font-weight: bold;
 }
 
-ion-modal {
-    --width: fit-content;
-    --height: fit-content;
-    --border-radius: 10px;
+.Modal {
+  --width: fit-content;
+  --height: fit-content;
+  --border-radius: 10px;
 }
+
 .bodyModal {
   padding: 10px;
   text-align: center;
@@ -450,5 +590,11 @@ ion-modal {
 
 .bodyModal ion-icon {
   font-size: 36px;
+}
+
+.modalReser {
+  --height: 40%;
+  --border-radius: 16px;
+  --box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 </style>
