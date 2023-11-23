@@ -39,14 +39,12 @@
                             </ion-button>
                         </ion-item>
 
+
                         <ion-text color="danger" v-if="confirmarContrasenia && contrasenia !== confirmarContrasenia"
                             style="text-align: center">
                             Las contraseñas no coinciden.
                         </ion-text>
                         <ion-button expand="full" @click="submitForm" class="custom-button">Guardar</ion-button>
-
-                        <ion-toast v-model="mostrarToastError" message="Por favor, complete todos los campos obligatorios."
-                            position="top" color="danger" duration="5000"></ion-toast>
                     </ion-list>
                 </ion-card-content>
             </ion-card>
@@ -64,11 +62,14 @@
 
                         <ion-item class="rounded-item">
                             <ion-label class="custom-label">Fecha de Nacimiento</ion-label>
-                            <ion-datetime-button datetime="datetime" v-model="fechaNacimiento"
-                                class="custom-button"></ion-datetime-button>
-                            <ion-modal :keep-contents-mounted="true">
-                                <ion-datetime id="datetime"></ion-datetime>
-                            </ion-modal>
+                            <ion-input aria-label="Fecha de Nacimiento" id="date">
+                                <ion-popover trigger="date" size="auto">
+                                    <ion-content>
+                                        <ion-datetime id="datetime" v-model="fechaNacimiento"
+                                            display-format="DD/MM/YYYY HH:mm"></ion-datetime>
+                                    </ion-content>
+                                </ion-popover>
+                            </ion-input>
                         </ion-item>
 
                         <ion-item class="rounded-item">
@@ -117,6 +118,8 @@
 
                         <ion-button expand="full" @click="submitForm2" class="custom-button">Registrar</ion-button>
 
+                        <ion-toast v-model="mostrarToastError" message="Por favor, complete todos los campos obligatorios."
+                            position="top" color="danger" duration="5000"></ion-toast>
                     </ion-list>
                 </ion-card-content>
             </ion-card>
@@ -125,17 +128,19 @@
 </template>
   
 <script>
+import { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonPopover } from '@ionic/vue';
 //Componentes
 import AppBarCustom from '../components/NavBarCustom.vue'
 //Ionic
-import { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage } from '@ionic/vue';
 import { ref } from 'vue';
 //Iconos
 //Servicios
 export default {
     components: { 
         AppBarCustom,
+        IonPopover,
         IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage 
+
     },
     name: 'RegistroUsuario',
 
@@ -156,13 +161,23 @@ export default {
         credencial: null,
         credencialPreview: null,
         mostrarSegundoFormulario: false,
+        registro: '',
     }),
     methods: {
         handleFileChange(event) {
             const file = event.target.files[0];
             if (file) {
-                this.credencial = file;
-                this.credencialPreview = URL.createObjectURL(file);
+                if (file.type.startsWith('image/')) {
+                    this.credencial = file;
+                    const img = new Image();
+                    img.src = URL.createObjectURL(file);
+                    img.onload = () => {
+                        this.credencialPreview = img.src;
+                    };
+                } else {
+                    alert("El archivo seleccionado no es una imagen válida.");
+                    this.credencial = null;
+                }
             }
         },
         validarCorreoElectronico(correo) {
@@ -212,15 +227,67 @@ export default {
             }
         },
 
-        submitForm2() {
+        async submitForm2() {
             // Realiza la validación del segundo formulario y registra los datos
+            const imagenBase64 = await this.getBase64Image();
             if (this.validateSecondForm()) {
-                alert("Correcto");
-                // Realiza el registro
-                // Después del registro, puedes redirigir al usuario a otra página, por ejemplo.
-            } else {
-                alert("Error");
+                console.log('Fecha de Nacimiento:', this.fechaNacimiento);
 
+                
+                console.log(imagenBase64);
+                function generateGuid() {
+                    let d = Date.now();
+                    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+                        d += performance.now(); // Agregar tiempo de alta resolución si está disponible
+                    }
+                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        const r = (d + Math.random() * 16) % 16 | 0;
+                        d = Math.floor(d / 16);
+                        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+                    });
+                };
+
+                // Función para generar el token
+                function generateToken() {
+                    // Aquí puedes implementar lógica personalizada para generar el token
+                    // Por ejemplo, puedes usar una biblioteca como jsonwebtoken o simplemente generar una cadena aleatoria única
+                    // En este ejemplo, simplemente genero una cadena aleatoria de longitud 32
+                    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+                    return token;
+                }
+
+                const formattedDate = new Date(this.fechaNacimiento).toISOString();
+
+                // Crea un objeto con los datos del usuario y datos personales
+                const usuario = {
+                    id_Usuario: generateGuid(),
+                    nombre_Usuario: this.nombreUsuario,
+                    correo: this.correo,
+                    contrasenia: this.contrasenia,
+                    token: generateToken(),
+                    fecha_Registro: new Date().toISOString(),
+                    estatus: true,
+                    registro: null
+                };
+
+                const datosPersonales = {
+                    id_DatosPersonales: generateGuid(),
+                    id_Usuario: usuario.id_Usuario,
+                    nombre_Completo: this.nombreCompleto,
+                    fecha_Nacimiento: this.fechaNacimiento,
+                    matricula: this.matricula,
+                    grupo: this.grupo,
+                    credencial: imagenBase64,
+                    universidad: this.universidad,
+                    telefono: this.telefono,
+                    correo: this.correo, // Usar el mismo correo que en el usuario si es relevante
+                    estatus: true
+                };
+
+                // Envia la solicitud al servidor para registrar al usuario y sus datos personales
+                this.registerUser(usuario, datosPersonales);
+            } else {
+               
             }
         },
         validateSecondForm() {
@@ -271,7 +338,6 @@ export default {
             // Verifica si hay algún mensaje de error
             if (errorMessage) {
                 // Muestra el mensaje de error
-                this.mostrarToastError = true;
                 alert("Error: \n" + errorMessage);
                 return false;
             } else {
@@ -298,6 +364,64 @@ export default {
             if (inputElement) {
                 inputElement.type = this.showPassword2 ? 'text' : 'password';
             }
+        },
+
+        registerUser(usuario, datosPersonales) {
+            // Envía la solicitud de registro al servidor
+            fetch("https://localhost:7038/api/Auth/RegistrarUsuario", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ usuario, datosPersonales })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("No se pudo registrar el usuario");
+                    }
+                    alert("Registro Exitoso");
+                    // Restablece los valores a vacío
+                    this.nombreUsuario = '';
+                    this.correo = '';
+                    this.contrasenia = '';
+                    this.confirmarContrasenia = '';
+                    this.fechaNacimiento = '';
+                    this.matricula = '';
+                    this.grupo = '';
+                    this.universidad = '';
+                    this.telefono = '';
+                    this.estatus = '';
+                    this.credencial = null;
+                    this.credencialPreview = null;
+                    this.mostrarSegundoFormulario = false;
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        },
+        getBase64StringFromDataURL(dataURL) {
+            return dataURL.replace('data:', '').replace(/^.+,/, '');
+        },
+        async getBase64Image() {
+            return new Promise((resolve) => {
+                const image = new Image();
+                image.src = this.credencialPreview;
+                image.onload = () => {
+                    const canvas = document.createElement("canvas");
+                    const ctx = canvas.getContext("2d");
+
+                    // Establecer el tamaño del canvas igual al tamaño de la imagen
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+
+                    // Dibujar la imagen en el canvas
+                    ctx.drawImage(image, 0, 0);
+
+                    // Obtener el base64 del canvas
+                    const dataURL = canvas.toDataURL("image/png");
+                    resolve(dataURL);
+                };
+            });
         },
     }
 }
