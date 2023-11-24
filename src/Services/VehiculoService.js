@@ -21,7 +21,7 @@ export default {
         return apiClient.post('/Vehiculos/RegistrarVehiculo', vehiculo)
     },
     updateVehiculo(vehiculo){
-        return apiClient.put('/Vehiculos/ActualizarVehiculo', vehiculo)
+        return apiClient.post('/Vehiculos/ActualizarVehiculo', vehiculo)
     },
     deleteVehiculo(Id_Unidad){
         return apiClient.delete(`/Vehiculos/EliminarVehiculo/${Id_Unidad}`)

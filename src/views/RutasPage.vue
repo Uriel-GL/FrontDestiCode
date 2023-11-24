@@ -4,8 +4,14 @@
     <loading :active="isLoading" :can-cancel="false" :is-full-page="fullPage" />
   
     <ion-content class="ion-padding">
+      <!-- Refresher -->
+      <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+      </ion-refresher>
+
       <div class="bodyContent">
 
+        <!-- Si no tiene un vehiculo registrado no puedo publicar una ruta -->
         <ion-card v-if="this.vehiculo.length == 0">
           <ion-card-header>
             <ion-card-title color="danger"><b>Advertencia</b></ion-card-title>
@@ -16,11 +22,11 @@
             <br>
             <h2>Registra uno si quieres publicar una ruta</h2>
             <br>
-            <ion-button shape="round" color="success" @click="goToRegister">Registrar Vehiculo</ion-button>
+            <ion-button shape="round" color="success" @click="goToVehiculo">Registrar Vehiculo</ion-button>
           </ion-card-content>
         </ion-card>
 
-        <ion-card v-if="this.vehiculo.length > 0" class="cardPubli">
+        <ion-card v-if="this.vehiculo.length > 0" class="cardPubli" :disabled="isRefresher">
           <ion-card-header>
             <ion-card-title>Publica tu Ruta</ion-card-title>
             <ion-card-subtitle>Ingresa los datos</ion-card-subtitle>
@@ -84,7 +90,7 @@
                   <ion-col size="11">
                     <ion-input v-model="nuevaRuta.Costo" label="Costo por Persona" color="success" 
                     label-placement="floating" placeholder="Ingresa un monto" 
-                    fill="outline">
+                    fill="outline" type="number">
                     </ion-input>
                   </ion-col>
                 </ion-row>
@@ -106,7 +112,7 @@
                       :value="car.id_Unidad">
                         {{ car.modelo }}
                       </ion-select-option>
-                      <ion-select-option v-if="vehiculo.length < 2" value="null">Registrar</ion-select-option>
+                      <ion-select-option v-if="vehiculo.length == 0" value="null">Registrar</ion-select-option>
                     </ion-select>
                   </ion-col>
                 </ion-row>
@@ -183,11 +189,29 @@
       </div>
     </ion-modal>
 
+    <!-- Modal de error de tus datos FORMULARIO -->
+    <ion-modal ref="modal" :is-open="showModalError">
+        <div class="bodyModal">
+            <h2>Adevertencia</h2>
+            <ion-icon :icon="alertCircleOutline" color="warning"></ion-icon>
+            <h3>Los datos ingresados no son válidos.</h3>
+            <ion-grid>
+            <ion-row>
+                <ion-col>
+                    <ion-button @click="showModalError = false" shape="round" color="success">
+                        Confirmar
+                    </ion-button>
+                </ion-col>     
+            </ion-row>
+            </ion-grid>
+        </div>
+    </ion-modal>
+
     <!-- Totas de error en la api invalidas -->
     <ion-toast 
       position="top" 
       position-anchor="header" 
-      message="Ocurrio un error intenta mas tarde."
+      message="Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde."
       :is-open="isErrorRuta"
       color="danger"
       :duration="2000"
@@ -206,12 +230,14 @@ import 'vue-loading-overlay/dist/css/index.css';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonInput, IonGrid, IonRow, IonCol,
   IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonDatetimeButton, IonModal, IonDatetime, IonLabel,
-  IonItem, IonIcon, IonSelect, IonSelectOption,IonButton, IonPopover, IonToast
+  IonItem, IonIcon, IonSelect, IonSelectOption,IonButton, IonPopover, IonToast, IonRefresher, 
+  IonRefresherContent, IonCardHeader,
+
 } from '@ionic/vue'
 //Iconos
 import { 
   location, cashOutline, timeOutline, carOutline, manOutline, checkmarkOutline, wifiOutline,
-  alertOutline
+  alertOutline, alertCircleOutline
 } from 'ionicons/icons'
 //Servicios 
 import VehiculoService from '../Services/VehiculoService'
@@ -221,7 +247,8 @@ export default {
     AppBarCustom,Loading,
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonInput, IonGrid, IonRow, IonCol,
     IonCard, IonCardTitle, IonCardSubtitle, IonCardContent, IonDatetimeButton, IonModal, IonDatetime,
-    IonLabel, IonItem, IonIcon, IonSelect, IonSelectOption, IonButton, IonPopover, IonToast
+    IonLabel, IonItem, IonIcon, IonSelect, IonSelectOption, IonButton, IonPopover, IonToast, IonRefresher,
+    IonRefresherContent,IonCardHeader
   },
   
   data: () => ({
@@ -234,12 +261,18 @@ export default {
     checkmarkOutline,
     wifiOutline,
     alertOutline,
+    alertCircleOutline,
 
     //Variables
+    showModalError: false,
     showModal: false,
     showModalConfirm: false,
     isLoading: false,
     fullPage: true,
+    ShowAlertLimite: false,
+    isErrorRuta: false,
+    isRefresher: false,
+
     vehiculo: [],
     nuevaRuta: { 
       Id_Ruta: '6c54d50b-2850-4081-8087-e1954c496a4c', //Guid de ejemplo para evitar problema de empty
@@ -252,8 +285,6 @@ export default {
       Lugares_Disponibles: 0,  
       Estatus: true  
     },
-    ShowAlertLimite: false,
-    isErrorRuta: false,
   }),
 
   async created() {
@@ -273,37 +304,62 @@ export default {
       }
     },
 
+    validarFormulario(){
+      let errorMessage = "";
+
+      if(!this.nuevaRuta.Lugar_Salida) errorMessage += "Campo ORIGEN Obligatorio\n"
+
+      if(!this.nuevaRuta.Lugar_Destino) errorMessage += "Campo DESTINO obligatorio\n";
+
+      if(!this.nuevaRuta.Fecha_Salida) errorMessage += "El costo es requerido";
+
+      if(!this.nuevaRuta.Lugares_Disponibles) errorMessage += "El costo es requerido";
+
+      if(!this.nuevaRuta.Costo) errorMessage += "El costo es requerido";
+
+      if(!this.nuevaRuta.Id_Unidad) errorMessage += "El vehiculo es obligatorio";
+
+      if(errorMessage == "") return true;
+
+      return false;
+    },
+
     async publicarRuta(){
       try{
         this.isErrorRuta = false;
         this.showModal = false
         this.isLoading = true
 
-        const limiteRegistro = await RutaService.getRutaByIdUsuario(this.$cookies.get('Usuario'));
-        var data = JSON.parse(JSON.stringify(limiteRegistro.data))
-        
-        if(data.length == 2){
-          this.isLoading = false;
-          this.ShowAlertLimite = true;
-          return;
-        }
-
-        var costo = parseFloat(this.nuevaRuta.Costo)
-        var lugares = parseInt(this.nuevaRuta.Lugares_Disponibles, 10)
-
-        this.nuevaRuta.Costo = costo
-        this.nuevaRuta.Lugares_Disponibles = lugares
-        this.nuevaRuta.Id_Usuario = this.$cookies.get('Usuario')
-
-        const response = await RutaService.registerRuta(this.nuevaRuta)
-
-        setTimeout(() => {
-          this.isLoading = false
-          if(response.status == 201 || response.status == 200){
-            this.limpiarFormulario()
-            this.showModalConfirm = true;
+        if(this.validarFormulario()){
+          const limiteRegistro = await RutaService.getRutaByIdUsuario(this.$cookies.get('Usuario'));
+          var data = JSON.parse(JSON.stringify(limiteRegistro.data))
+          
+          if(data.length == 2){
+            this.isLoading = false;
+            this.ShowAlertLimite = true;
+            return;
           }
-        }, 4000);
+
+          var costo = parseFloat(this.nuevaRuta.Costo)
+          var lugares = parseInt(this.nuevaRuta.Lugares_Disponibles, 10)
+
+          this.nuevaRuta.Costo = costo
+          this.nuevaRuta.Lugares_Disponibles = lugares
+          this.nuevaRuta.Id_Usuario = this.$cookies.get('Usuario')
+
+          const response = await RutaService.registerRuta(this.nuevaRuta)
+
+          setTimeout(() => {
+            this.isLoading = false;
+            if(response.status == 201 || response.status == 200){
+              this.limpiarFormulario()
+              this.showModalConfirm = true;
+            }
+          }, 4000);
+        }else{
+          this.isLoading = false;
+          this.showModalError = true;
+        }
 
       }catch(error){
         this.isLoading = false;
@@ -332,6 +388,21 @@ export default {
         this.nuevaRuta.Id_Unidad = '';
       }
     },
+
+    goToVehiculo(){
+      this.$router.push('/vehiculos')
+    },
+
+    async handleRefresh(event){
+      this.isRefresher = true;
+      await this.cargarDatos()
+
+      setTimeout(() => {
+        this.isRefresher = false;
+        event.target.complete();
+      }, 3000);
+
+    }
 
   }
 }

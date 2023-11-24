@@ -236,7 +236,7 @@ export default {
 
                     const limiteCarro = await VehiculoService.getVehiculosByUsuario(this.$cookies.get('Usuario'))
                     var data = JSON.parse(JSON.stringify(limiteCarro.data));
-                    if(data.length == 2){
+                    if(data.length == 1){
                         this.isLoading = false;
                         this.ShowAlertLimite = true;
                         return;

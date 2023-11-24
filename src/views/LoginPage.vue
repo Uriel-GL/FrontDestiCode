@@ -14,18 +14,30 @@
           :icon="closeCircleOutline"
         ></ion-toast>
 
+        <!-- Totas de error de credenciales -->
+        <ion-toast 
+          position="top" 
+          position-anchor="header" 
+          message="Las credenciales ingresadas son incorrectas. Por favor, verifica la información proporcionada."
+          :is-open="isErrorLogin"
+          color="warning"
+          :duration="4000"
+          :icon="wifiOutline"
+        ></ion-toast>
+
         <!-- Totas de error de conexion -->
         <ion-toast 
           position="top" 
           position-anchor="header" 
-          message="Ocurrio un error al intentar conectar con el servidor, intenta mas tarde."
+          message="Se produjo un error al intentar conectar con el servidor. Por favor, inténtalo de nuevo más tarde."
           :is-open="isErrorConnection"
           color="danger"
-          :duration="2000"
+          :duration="4000"
           :icon="wifiOutline"
         ></ion-toast>
 
         <ion-card class="ion-card-small">
+          <ion-progress-bar type="indeterminate" v-if="isLoading"></ion-progress-bar>
           <ion-card-header>
             <ion-card-title>Bienvenido</ion-card-title>
             <ion-card-subtitle>Ingresa tu Email y contraseña</ion-card-subtitle>
@@ -65,20 +77,22 @@
                 </ion-col>
 
                 <ion-col>
-                  <ion-tex>
+                  <ion-text>
                     <a href="/recuperar-contra">¿Olvidaste tu contraseña?</a>
-                  </ion-tex>
+                  </ion-text>
                 </ion-col>
 
                 <ion-col size="12">
-                  <ion-button expand="full" shape="round" @click="iniciarSesion">
+                  <ion-button expand="full" color="tertiary" :disabled="disabledButton" shape="round" @click="iniciarSesion">
                     Inciar Sesión
                   </ion-button>
                 </ion-col>
 
                 <ion-col size="12" style="text-align: center;">
                   <ion-text>¿No tienes Cuenta?</ion-text>
-                  <ion-button expand="full" @click="registrarUsuario" shape="round" fill="outline">Registrate Aquí</ion-button>
+                  <ion-button expand="full" color="tertiary" @click="registrarUsuario" shape="round" fill="outline">
+                    Registrate Aquí
+                  </ion-button>
                 </ion-col>
 
               </ion-row>
@@ -94,7 +108,8 @@
 import AppBarCustom from '../components/NavBarCustom.vue'
 //Ionic
 import { 
-  IonInput, IonButton, IonToast, IonPage, IonCard, IonCardHeader, IonCardContent 
+  IonInput, IonButton, IonToast, IonPage, IonCard, IonCardHeader, IonCardContent, IonProgressBar,
+  IonGrid, IonRow, IonCol, IonCardTitle, IonCardSubtitle, IonText, IonContent,
 } from '@ionic/vue';
 //Iconos
 import { closeCircleOutline, wifiOutline } from 'ionicons/icons'
@@ -104,7 +119,9 @@ import AuthService from '../Services/AuthService'
 export default {
   components: { 
     AppBarCustom,
-    IonInput, IonButton, IonToast, IonPage,IonCard, IonCardHeader, IonCardContent 
+    IonInput, IonButton, IonToast, IonPage,IonCard, IonCardHeader, IonCardContent,
+    IonProgressBar, IonGrid, IonRow, IonCol, IonCardTitle, IonCardSubtitle, IonText, IonContent,
+    IonProgressBar,
   },
   name: 'Home',
   data: () => ({
@@ -115,6 +132,8 @@ export default {
     usuario: '',
     contrasena: '',
 
+    isLoading: false,
+    disabledButton: false,
     mostrarToastError: false,
     isErrorLogin: false,
     isErrorConnection: false,
@@ -136,11 +155,11 @@ export default {
     },
 
     validateEmail(email) {
-      var data = email.match(
-        /^(?=.{1,254}$)(?=.{1,64}@)[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-      );
+      const correoRegex = /@uttt\.edu\.mx$/;
 
-      this.isValidCorreo = !!data;
+      var isValid = correoRegex.test(email);
+
+      this.isValidCorreo = isValid;
 
       if(this.isValidCorreo){
         return 'success'
@@ -165,29 +184,43 @@ export default {
       try{
         if(!this.isValidCorreo && !this.isValidContra) return;
         
+        this.isLoading = true;
+        this.disabledButton = true;
         this.isErrorLogin = false;
         this.isErrorConnection = false;
 
         var credenciales = { Correo: this.usuario, Contrasenia: this.contrasena }
         const response = await AuthService.login(credenciales)
 
-        if(response.status == 200 || response.status == 201){
-          this.$cookies.set('AccessToken', response.data.token, { expires: 1 });
-          this.$cookies.set('Usuario', response.data.usuario, { expires: 1 });
-          this.isValidCorreo = false;
-          this.isValidContra = false;
-          this.usuario = '';
-          this.contrasena = '';
-          this.$router.push('/home')
-        }else{
-          this.isErrorLogin = true;
-        }
+        setTimeout(() => {
+          if(response.status == 200 || response.status == 201){
+            this.$cookies.set('AccessToken', response.data.token, { expires: 1 });
+            this.$cookies.set('Usuario', response.data.usuario, { expires: 1 });
+            this.isValidCorreo = false;
+            this.isValidContra = false;
+            this.usuario = '';
+            this.contrasena = '';
+            this.isLoading = false;
+            this.disabledButton = false;
+            this.$router.push('/home')
+          }
+          if(response.status == 400){
+            this.isErrorLogin = true;
+            this.disabledButton = false;
+          }
+        }, 3000);
+        
       }
       catch(error){
         if(error.message.includes('Network Error')){
+          this.isLoading = false;
           this.isErrorConnection = true;
-        }else {
-            console.error('Error desconocido:', error);
+          this.disabledButton = false;
+        }else{
+          this.isLoading = false;
+          this.isErrorLogin = true;
+          this.disabledButton = false;
+          console.error('Error desconocido');
         }
       }
     },
