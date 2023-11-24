@@ -9,7 +9,8 @@ import Reservaciones from '../views/ReservacionPage.vue';
 import Perfil from '../views/PerfilPage.vue';
 import RutaDetalle from '../views/DetalleRutaPage.vue';
 import Login from '../views/LoginPage.vue';
-import RecuperarContra from '../views/RecuperarContra.vue'
+import RecuperarContra from '../views/RecuperarContra.vue';
+import ActualizarUsuario from '../views/ActualiUsuario.vue';
 
 const routes = [
   {
@@ -74,6 +75,11 @@ const routes = [
     path: '/recuperar-contra',
     name: 'Recuperar Contraseña',
     component: RecuperarContra
+  },
+  {
+    path: '/ActualizarDatosPersonales/:id?',
+    name: 'Actualizar Datos',
+    component: ActualizarUsuario
   }
 ]
 

@@ -4,8 +4,13 @@
       <loading :active="isLoading" :can-cancel="false" :is-full-page="true" />
   
       <ion-content>
+        <!-- Refresher -->
+        <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
+          <ion-refresher-content></ion-refresher-content>
+        </ion-refresher>
+        
         <div class="bodyReservaciones">
-          <ion-card class="card">
+          <ion-card class="card" :disabled="isRefresher">
             <ion-card-header>
               <ion-segment>
                 <ion-segment-button @click="showTickets">
@@ -121,7 +126,7 @@
                         <ion-button @click="VerSolicitantes(ruta.id_Ruta)" expand="full" :disabled="ruta.estatus == false" color="success"  class="btnViaje">
                           Ver Solicitudes
                         </ion-button>
-                        <ion-button @click="openModalConfirmDelete(ruta.id_Ruta)" :disabled="ruta.lugares_Disponibles >= 0 && ruta.estatus == true" expand="full" class="btnViaje" color="danger" fill="clear">
+                        <ion-button @click="openModalConfirmDelete(ruta.id_Ruta)" expand="full" class="btnViaje" color="danger" fill="clear">
                           Eliminar Ruta
                         </ion-button>
                       </ion-card>
@@ -131,7 +136,7 @@
             
               </ion-card-content>
             
-            </ion-card>
+          </ion-card>
         </div>
 
         <!-- Modal de personas que reservaron un lugar en tu ruta -->
@@ -288,7 +293,8 @@ import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardHeader, 
   IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal, IonGrid, IonCol, IonRow,
-  IonText, IonButton, IonIcon, IonLabel, IonButtons, IonList, IonItem, IonAvatar, IonToast
+  IonText, IonButton, IonIcon, IonLabel, IonButtons, IonList, IonItem, IonAvatar, IonToast, IonRefresher,
+  IonRefresherContent
 } from '@ionic/vue'
 //Iconos
 import { 
@@ -303,7 +309,8 @@ export default {
     AppBarCustom,Loading,
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardHeader, 
     IonCardSubtitle, IonCardTitle, IonSegment, IonSegmentButton, IonModal, IonGrid, IonCol, IonRow,
-    IonText, IonButton, IonIcon, IonLabel, IonButtons, IonList, IonItem, IonAvatar, IonToast
+    IonText, IonButton, IonIcon, IonLabel, IonButtons, IonList, IonItem, IonAvatar, IonToast, IonRefresher,
+    IonRefresherContent
   },
   
   data: () => ({
@@ -329,6 +336,7 @@ export default {
     isLoading: false,
     ShowRutas: false,  
     isErrorData: false,
+    isRefresher: false,
 
     TusTickets: [],
     TusRutas: [],
@@ -434,10 +442,10 @@ export default {
       try{
         this.showModalConfirmDelete = false;
         this.isLoading = true;
-        //const response = await RutaService.EliminarRuta(this.idRuta);
+        const response = await RutaService.eliminarRuta(this.idRuta);
 
         setTimeout(() => {
-          if(true/*response.status == 201 || response.status == 200*/){
+          if(response.status == 201 || response.status == 200){
             this.isLoading = false;
             this.showModalSuccessDelete = true;
           }
@@ -446,6 +454,17 @@ export default {
       catch(error){
         this.isErrorData = true;
       }
+    },
+
+    async handleRefresh(event){
+      this.isRefresher = true;
+      await this.cargarDatos()
+
+      setTimeout(() => {
+        this.isRefresher = false;
+        event.target.complete();
+      }, 3000);
+
     }
   },
 

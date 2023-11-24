@@ -4,7 +4,12 @@
       <loading :active="isLoading" :can-cancel="false" :is-full-page="true" />
   
       <ion-content class="ion-padding">
-        <ion-card class="cardPerfil">
+        <!-- Refresher -->
+        <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
+          <ion-refresher-content></ion-refresher-content>
+        </ion-refresher>
+
+        <ion-card class="cardPerfil" :disabled="isRefresh">
           <ion-card-header>
             <ion-avatar>
               <img src="https://ionicframework.com/docs/img/demos/avatar.svg" >
@@ -43,7 +48,7 @@
             <br>
             <ion-card-title>Vehiculos Registrados</ion-card-title>
             <ion-list>
-              <ion-item v-if="vehiculos.length == 1">
+              <ion-item v-if="vehiculos.length == 0">
                 <ion-label>Agregar Vehiculo</ion-label>
                 <ion-button fill="clear" shape="round" color="success" @click="goToVehiculos">
                   <ion-icon style="font-size: 26px;" :icon="addCircleOutline" slot="icon-only"></ion-icon>
@@ -170,7 +175,8 @@ import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardTitle,
-  IonCardHeader, IonLabel, IonItem, IonText, IonAvatar, IonIcon, IonList, IonModal
+  IonCardHeader, IonLabel, IonItem, IonText, IonAvatar, IonIcon, IonList, IonModal, IonRefresher, IonToast,
+  IonGrid, IonCol, IonRow, IonCardSubtitle, IonRefresherContent, IonButton
 } from '@ionic/vue'
 //Iconos
 import { 
@@ -182,9 +188,10 @@ import UsuarioService from '../Services/UsuarioService'
 import VehiculoService from '@/Services/VehiculoService'
 export default {
   components: {
-    NavBarCustomVue,Loading,
+    NavBarCustomVue, Loading,
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage, IonCard, IonCardContent, IonCardTitle,
-    IonCardHeader, IonLabel, IonItem, IonText, IonAvatar, IonIcon, IonList, IonModal
+    IonCardHeader, IonLabel, IonItem, IonText, IonAvatar, IonIcon, IonList, IonModal, IonRefresher,
+    IonGrid, IonCol, IonRow, IonToast, IonCardSubtitle, IonRefresherContent, IonButton
   },
   
   data: () => ({
@@ -210,6 +217,8 @@ export default {
     showModalSuccess: false,
     showModalError: false,
     isLoading: false,
+    isRefresh: false, 
+
     usuario: {},
     datosP: {},
     vehiculos: [],
@@ -248,7 +257,9 @@ export default {
     },
 
     editarInfo(){
+      var id = this.$cookies.get('Usuario');
       console.log(this.$cookies.get('Usuario'))
+      this.$router.push(`/ActualizarDatosPersonales/${id}`)
     },
 
     editarVehiculo(Id_Unidad) {
@@ -284,6 +295,17 @@ export default {
 
     goToVehiculos(){
       this.$router.push('/vehiculos')
+    },
+
+    async handleRefresh(event){
+      this.isRefresh = true;
+      await this.cargarDatos()
+
+      setTimeout(() => {
+        this.isRefresh = false;
+        event.target.complete();
+      }, 3000);
+
     }
   }
 }

@@ -247,7 +247,7 @@ export default {
             this.showModal = false
             this.isLoading = true
             this.reservacion.Id_Ruta = this.ruta.id_Ruta;
-            this.reservacion.Id_Usuario = this.usuario.id_Usuario;
+            this.reservacion.Id_Usuario = this.$cookies.get('Usuario');
 
             const response = await RutaService.reservarLugar(this.reservacion)
             setTimeout(() => {

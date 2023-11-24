@@ -113,6 +113,35 @@
             </div>
         </ion-modal>
 
+        <!-- Modal de error de tus datos FORMULARIO -->
+        <ion-modal ref="modal" :is-open="showModalErrorForm">
+            <div class="bodyModal">
+                <h2>Adevertencia</h2>
+                <ion-icon :icon="alertCircleOutline" color="warning" style="font-size: 46px;"></ion-icon>
+                <h3>Los datos ingresados no son válidos. <b>Verificalos</b></h3>
+                <ion-grid>
+                <ion-row>
+                    <ion-col>
+                        <ion-button @click="showModalErrorForm = false" shape="round" color="success">
+                            Aceptar
+                        </ion-button>
+                    </ion-col>     
+                </ion-row>
+                </ion-grid>
+            </div>
+        </ion-modal>
+
+        <!-- Totas de error en la api invalidas -->
+        <ion-toast 
+        position="top" 
+        position-anchor="header" 
+        message="Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde."
+        :is-open="isErrorDefault"
+        color="danger"
+        :duration="2000"
+        :icon="wifiOutline"
+        ></ion-toast>
+
     </ion-page>
 </template>
 
@@ -127,7 +156,7 @@ import {
     IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol, IonModal
 } from '@ionic/vue';
 //Iconos
-import { cloudUploadOutline, checkmarkOutline, closeOutline } from 'ionicons/icons'
+import { cloudUploadOutline, checkmarkOutline, closeOutline, alertCircleOutline } from 'ionicons/icons'
 //Servicios 
 import VehiculoService from '../Services/VehiculoService'
 export default {
@@ -142,11 +171,15 @@ export default {
         cloudUploadOutline,
         checkmarkOutline,
         closeOutline,
+        alertCircleOutline,
 
         fullPage: true,
         isLoading: false,
         showModalConfirm: false,
         showModalError: false,
+        showModalErrorForm: false,
+        isErrorDefault: false,
+
         id_Unidad: '',
         id_Usuario: '',
         color: '',
@@ -178,31 +211,58 @@ export default {
                 this.$router.push('/login')
             }
         },
+        validarFormulario(){
+            let errorMessage = "";
 
+            if(!this.color || this.color.length <= 2) errorMessage += "Ingresa un color valido."
+
+            if(!this.placa || this.placa.length <= 2) errorMessage += "El número de placa es invalido."
+
+            if(!this.modelo || this.modelo.length <= 2) errorMessage += "El modelo es requerido"
+
+            if(!this.imagen) errorMessage += "Se requiere una imagen"
+
+            if(errorMessage == "") return true;
+
+            return false;
+        },
         async actualizarDatos(){
-            this.isLoading = true;
-            const imagenBase64 = await this.getBase64Image();
+            try{
+                this.isErrorDefault = false;
+                this.isLoading = true;
+                if(this.validarFormulario()){
+                    const imagenBase64 = await this.getBase64Image();
 
-            const vehiculoActualizado = {
-                Id_Unidad: this.id_Unidad,
-                Id_Usuario: this.$cookies.get('Usuario'),
-                Color: this.color,
-                Placa: this.placa,
-                Imagen: imagenBase64,
-                Modelo: this.modelo
-            };
+                    const vehiculoActualizado = {
+                        Id_Unidad: this.id_Unidad,
+                        Id_Usuario: this.$cookies.get('Usuario'),
+                        Color: this.color,
+                        Placa: this.placa,
+                        Imagen: imagenBase64,
+                        Modelo: this.modelo
+                    };
 
-            const response = await VehiculoService.updateVehiculo(vehiculoActualizado)
-            setTimeout(() => {
-                if(response.status == 201 || response.status == 200){
-                    this.isLoading = false; 
-                    this.showModalConfirm = true;
+                    const response = await VehiculoService.updateVehiculo(vehiculoActualizado)
+                    setTimeout(() => {
+                        if(response.status == 201 || response.status == 200){
+                            this.isLoading = false; 
+                            this.showModalConfirm = true;
+                        }else{
+                            this.isLoading = false; 
+                            this.showModalError = true;
+                        }
+                        
+                    }, 3000);
                 }else{
                     this.isLoading = false; 
-                    this.showModalError = true;
+                    this.showModalErrorForm = true;
                 }
-                   
-            }, 3000);
+            }
+            catch(error){
+                this.isLoading = false;
+                this.isErrorDefault = true;
+            }
+            
         },
         limpiarFormulario() {
             // Después de un registro exitoso, restablece los valores a vacío

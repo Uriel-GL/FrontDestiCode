@@ -6,9 +6,14 @@
     src="https://images.pexels.com/photos/56832/road-asphalt-space-sky-56832.jpeg" /> -->
 
     <ion-content class="ion-padding">
+      <!-- Refresher -->
+      <ion-refresher slot="fixed" @ionRefresh="handleRefresh($event)">
+        <ion-refresher-content></ion-refresher-content>
+      </ion-refresher>
+
       <div class="bodyHome">
         <!-- Card de Filtros de Rutas -->
-        <ion-card class="cardFilter">
+        <ion-card class="cardFilter" :disabled="isRefresher">
           <ion-card-title>¿A dónde quieres ir?</ion-card-title>
           <ion-card-subtitle>Ingresa tu destino</ion-card-subtitle>
           <ion-card-content>
@@ -50,7 +55,7 @@
                 </ion-col>
 
                 <ion-col class="colBtnBuscar" size="6">
-                  <ion-button @click="buscarRutas" class="btnBuscar" shape="round">
+                  <ion-button @click="buscarRutas" color="tertiary" class="btnBuscar" shape="round">
                     <ion-icon :icon="searchOutline" slot="start"></ion-icon>
                     Buscar
                   </ion-button>
@@ -129,7 +134,7 @@
   import { IonHeader, IonToolbar, IonTitle, IonContent, IonPage,IonItem, IonSelect, IonSelectOption, IonText } from '@ionic/vue'
   import { IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle } from '@ionic/vue'
   import { IonRow, IonCol, IonButton, IonIcon, IonInput, IonGrid, IonLabel,IonItemDivider, IonList  } from '@ionic/vue'
-  import { IonAvatar, IonChip } from '@ionic/vue'
+  import { IonAvatar, IonChip, IonRefresher, IonRefresherContent } from '@ionic/vue'
   //Iconos
   import { ellipse, arrowDown, arrowUp, navigateOutline, searchOutline } from 'ionicons/icons'
   //Servicios
@@ -142,7 +147,8 @@ export default {
     IonHeader, IonToolbar, IonTitle, IonContent, IonPage,
     IonCard, IonCardContent, IonCardHeader, IonCardSubtitle, IonCardTitle,
     IonRow, IonCol, IonSelect, IonSelectOption, IonText, IonItem, IonButton,
-    IonIcon,IonInput,IonGrid,IonLabel,IonItemDivider, IonList, IonAvatar,IonChip
+    IonIcon,IonInput,IonGrid,IonLabel,IonItemDivider, IonList, IonAvatar,IonChip,
+    IonRefresher, IonRefresherContent
   },
 
   data: () => ({
@@ -162,6 +168,7 @@ export default {
     showOrigenes: false,
     showDestinos: false,
     showMessage: false,
+    isRefresher: false,
 
     rutasItems: [],
     rutasFiltradas: []
@@ -206,9 +213,9 @@ export default {
         this.origenes = Array.from(origenSet);
         this.destinos = Array.from(destinoSet);
     
-        console.log(this.rutasItems)
-        console.log(this.origenes)
-        console.log(this.destinos)
+        // console.log(this.rutasItems)
+        // console.log(this.origenes)
+        // console.log(this.destinos)
       }else{
         this.$router.push('/login')
       }
@@ -224,7 +231,7 @@ export default {
         this.rutasFiltradas = this.rutasItems.filter(rutaAprox => 
           rutaAprox.lugar_Salida.includes(this.OrigenValue.trim()) && 
           rutaAprox.lugar_Destino.includes(this.DestinoValue.trim()) && 
-          rutaAprox.lugares_Disponibles <= this.LugaresValue
+          rutaAprox.lugares_Disponibles >= this.LugaresValue
         )
         if(this.rutasFiltradas.length > 0){
           this.showMessage = false;
@@ -260,6 +267,20 @@ export default {
 
     IrADetalle(Id_Ruta){
       this.$router.push(`detalle-ruta/${Id_Ruta}`)
+    },
+
+    async handleRefresh(event){
+      this.isRefresher = true;
+      await this.cargarDatos()
+
+      setTimeout(() => {
+        this.OrigenValue = '';
+        this.DestinoValue = '';
+        this.isRefresher = false;
+        this.$router.go();
+        event.target.complete();
+      }, 3000);
+
     }
   }
 }

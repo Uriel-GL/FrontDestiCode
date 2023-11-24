@@ -1,167 +1,293 @@
 <template>
     <ion-page>
         <app-bar-custom title="Registro de Usuarios"></app-bar-custom>
+        <loading :active="isLoading" :can-cancel="false" :is-full-page="true" />
 
         <ion-content class="ion-padding" v-if="!mostrarSegundoFormulario">
-            <ion-card class="ion-card-small">
+
+            <ion-card class="cardForm1">
+                <ion-card-header>
+                    <ion-card-title>Registro</ion-card-title>
+                    <ion-card-subtitle>Ingresa tus datos de ingreso</ion-card-subtitle>
+                </ion-card-header>
+
                 <ion-card-content>
-                    <ion-list>
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Nombre de Usuario</ion-label>
-                            <ion-input aria-label="Nombre de Usuario" v-model="nombreUsuario" type="text" required
-                                class="custom-input custom-input-border-color-1"></ion-input>
-                        </ion-item>
+                    <img src="https://firebasestorage.googleapis.com/v0/b/tiendaservicios-b7281.appspot.com/o/Imagenes%2FLogo.jpg?alt=media&token=045bb3d8-886b-4b6e-af3d-1c55197c9594" 
+                     class="login-image">
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Correo Electrónico</ion-label>
-                            <ion-input aria-label="Correo Electrónico" v-model="correo" type="email" required
-                                class="custom-input custom-input-border-color-2"></ion-input>
-                        </ion-item>
+                    <br>
+                    <ion-grid>
+                        <ion-row>
+                            <ion-col size="12">
+                                <ion-input label="Correo Electrónico" v-model="correo" type="email" label-placement="floating" fill="outline" color="success"></ion-input>
+                                <ion-text color="danger" v-if="!CorreoValido"
+                                    style="text-align: center">
+                                    El correo no es valido
+                                </ion-text>
+                            </ion-col>
+                            <ion-col size="12">
+                                <ion-input label="Contraseña" type="password" v-model="contrasenia" label-placement="floating" fill="outline" color="success"></ion-input>
+                                <ion-text color="danger" v-if="contrasenia && contrasenia.length < 8"
+                                    style="text-align: center">
+                                    La contraseña debe tener minimo 8 caracteres
+                                </ion-text>
+                            </ion-col>
+                            <ion-col size="12">
+                                <ion-input label="Confirmación de contraseña" v-model="confirmarContrasenia" type="password" label-placement="floating" fill="outline" color="success"></ion-input>
+                                <ion-text color="danger" v-if="confirmarContrasenia && contrasenia !== confirmarContrasenia"
+                                    style="text-align: center">
+                                    Las contraseñas no coinciden.
+                                </ion-text>
+                            </ion-col>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Contraseña</ion-label>
-                            <ion-input aria-label="Contraseña" v-model="contrasenia" type="password" required
-                                class="custom-input-password custom-input-border-color-3"
-                                ref="contraseniaInput"></ion-input>
-                            <ion-button slot="end" @click="togglePasswordVisibility" fill="clear" class="custom-eye-button">
-                                <ion-icon :icon="showPassword ? 'eye' : 'eye-off'"></ion-icon>
-                            </ion-button>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Confirmar Contraseña</ion-label>
-                            <ion-input aria-label="Confirmar Contraseña" v-model="confirmarContrasenia" type="password"
-                                required class="custom-input-password custom-input-border-color-3"
-                                ref="confirmarContraseniaInput"></ion-input>
-                            <ion-button slot="end" @click="togglePasswordVisibility2" fill="clear"
-                                class="custom-eye-button">
-                                <ion-icon :icon="showPassword2 ? 'eye' : 'eye-off'"></ion-icon>
-                            </ion-button>
-                        </ion-item>
-
-
-                        <ion-text color="danger" v-if="confirmarContrasenia && contrasenia !== confirmarContrasenia"
-                            style="text-align: center">
-                            Las contraseñas no coinciden.
-                        </ion-text>
-                        <ion-button expand="full" @click="submitForm" class="custom-button">Guardar</ion-button>
-                    </ion-list>
+                            <ion-col size="12">
+                                <ion-button @click="validarFormulario1" shape="round" color="tertiary" 
+                                expand="full">
+                                    Continuar
+                                </ion-button>
+                            </ion-col>
+                            <ion-col size="12">
+                                <ion-button expand="full" @click="goToLogin" shape="round" color="danger" fill="clear">
+                                    Regresar
+                                </ion-button>
+                            </ion-col>
+                        </ion-row>
+                    </ion-grid>
                 </ion-card-content>
             </ion-card>
         </ion-content>
 
         <ion-content class="ion-padding" v-else>
-            <ion-card class="ion-card-small">
+
+            <ion-card class="cardForm1">
+                <ion-card-header>
+                    <ion-card-title>Tus datos personales</ion-card-title>
+                    <ion-card-subtitle>Ingresa tu información</ion-card-subtitle>
+                </ion-card-header>
+
                 <ion-card-content>
-                    <ion-list>
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Nombre Completo</ion-label>
-                            <ion-input aria-label="Nombre Completo" v-model="nombreCompleto" type="text" required
-                                class="custom-input custom-input-border-color-1"></ion-input>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Fecha de Nacimiento</ion-label>
-                            <ion-input aria-label="Fecha de Nacimiento" id="date">
-                                <ion-popover trigger="date" size="auto">
+                    <ion-grid>
+                        <ion-row>
+                            <ion-col size="12">
+                                <ion-input label="Nombre Completo" label-placement="floating"
+                                placeholder="Ingresa tu nombre Completo" 
+                                fill="outline" color="success"
+                                v-model="nombreCompleto">
+                                </ion-input>
+                                <ion-text color="danger" v-if="nombreCompleto && nombreCompleto.length < 3"
+                                    style="text-align: center">
+                                    El nombre es requerido.
+                                </ion-text>
+                            </ion-col>
+                            <ion-col size="12">
+                                <ion-input label="Telefono" label-placement="floating"
+                                placeholder="Ingresa tu número de telefono" 
+                                fill="outline" color="success"
+                                v-model="telefono">
+                                </ion-input>
+                                <ion-text color="danger" v-if="telefono && telefono.length < 10"
+                                    style="text-align: center">
+                                    El núm debe ser minimo de 10 digitos.
+                                </ion-text>
+                            </ion-col>
+                            <ion-col size="6">
+                                <ion-input label="Grupo" label-placement="floating"
+                                placeholder="Ingresa el grupo al que perteneces"
+                                fill="outline" color="success"
+                                v-model="grupo">
+                                </ion-input>
+                                <ion-text color="danger" v-if="grupo && grupo.length < 3"
+                                    style="text-align: center">
+                                    El grupo es requerido.
+                                </ion-text>
+                            </ion-col>
+                            <ion-col size="6">
+                                <ion-input label="Matricula" label-placement="floating"
+                                placeholder="Ingresa tu núm de Matricula"
+                                fill="outline" color="success"
+                                v-model="matricula">
+                                </ion-input>
+                                <ion-text color="danger" v-if="matricula && matricula.length < 8"
+                                    style="text-align: center">
+                                    La matricula debe minimo de 8 digitos.
+                                </ion-text>
+                            </ion-col>
+                            <ion-col size="12">
+                                <ion-item>
+                                <ion-label>Fecha de Nacimiento</ion-label>
+                                <ion-input :value="fechaNacimiento" 
+                                    class="ion-text-end" id="date" />
+                                    <ion-popover trigger="date" size="auto">
                                     <ion-content>
-                                        <ion-datetime id="datetime" v-model="fechaNacimiento"
-                                            display-format="DD/MM/YYYY HH:mm"></ion-datetime>
+                                        <ion-datetime v-model="fechaNacimiento" display-format="DD/MM/YYYY"></ion-datetime>
                                     </ion-content>
-                                </ion-popover>
-                            </ion-input>
-                        </ion-item>
+                                    </ion-popover>
+                                </ion-item>
+                                <ion-text color="danger" v-if="fechaNacimiento && fechaNacimiento.length < 5"
+                                    style="text-align: center">
+                                    La fecha de nacimiento es requerida.
+                                </ion-text>
+                            </ion-col>
+                        </ion-row>
+                        <br>
+                        <!-- <ion-row>
+                            <ion-col class="colImage">
+                                <ion-card-title>Fotografia de Referencia</ion-card-title>
+                                <ion-card-subtitle>
+                                    Agrega una imagen de tu credencial de la UT, para validar tus datos.
+                                </ion-card-subtitle>
+                            </ion-col>
+                        </ion-row>
+                        <ion-row>
+                            <ion-col size="12">
+                                <ion-item>
+                                    <label class="image-upload">
+                                        <ion-input type="file" v-model="credencial" 
+                                        @change="handleFileChange" 
+                                        accept="image/*"
+                                        required>
+                                        </ion-input>
+                                        <ion-icon :icon="cloudUploadOutline"></ion-icon>
+                                        Subir Imagen
+                                    </label>
+                                </ion-item>
+                            </ion-col>
+                            <ion-col size="12">
+                                <ion-item>
+                                    <ion-img :src="credencialPreview" v-if="credencialPreview"></ion-img>
+                                </ion-item>
+                            </ion-col>
+                        </ion-row> -->
+                        
+                        <br>
+                        <div class="botonesRegistro">
+                            <ion-button shape="round" fill="clear" color="danger"
+                            @click="mostrarSegundoFormulario = false">
+                                Regresar
+                            </ion-button>
 
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Matrícula</ion-label>
-                            <ion-input aria-label="Matricula" v-model="matricula" type="number" pattern="[0-9]{8}" required
-                                class="custom-input custom-input-border-color-2"></ion-input>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Grupo</ion-label>
-                            <ion-input aria-label="Grupo" v-model="grupo" type="text"
-                                class="custom-input custom-input-border-color-3" required></ion-input>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Universidad</ion-label>
-                            <ion-input aria-label="Universidad" v-model="universidad" type="text"
-                                class="custom-input custom-input-border-color-4" required></ion-input>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Teléfono</ion-label>
-                            <ion-input aria-label="Telefono" v-model="telefono" type="tel" pattern="[0-9]*"
-                                class="custom-input custom-input-border-color-1" required></ion-input>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Estatus</ion-label>
-                            <ion-input aria-label="Estatus" v-model="estatus" type="text"
-                                class="custom-input custom-input-border-color-2" required></ion-input>
-                        </ion-item>
-
-                        <ion-item class="rounded-item">
-                            <ion-label class="custom-label">Credencial</ion-label>
-                            <ion-input type="file" v-model="credencial" @change="handleFileChange" accept="image/*"
-                                class="custom-file-input" required></ion-input>
-                        </ion-item>
-
-                        <ion-item>
-                            <ion-img :src="credencialPreview" v-if="credencialPreview"></ion-img>
-                        </ion-item>
-
-                        <!-- Botón para regresar al primer formulario y ocultar el segundo formulario -->
-                        <ion-button expand="full" @click="regresarAlPrimerFormulario" class="custom-button"
-                            v-if="mostrarSegundoFormulario">Regresar</ion-button>
-
-                        <ion-button expand="full" @click="submitForm2" class="custom-button">Registrar</ion-button>
-
-                        <ion-toast v-model="mostrarToastError" message="Por favor, complete todos los campos obligatorios."
-                            position="top" color="danger" duration="5000"></ion-toast>
-                    </ion-list>
+                            <ion-button shape="round" color="tertiary" @click="registrarUsuario">
+                                Registrarme
+                            </ion-button>
+                        </div>
+                    </ion-grid>
                 </ion-card-content>
             </ion-card>
+
         </ion-content>
+
+        <!-- Totas de error en la api invalidas -->
+        <ion-toast 
+        position="top" 
+        position-anchor="header" 
+        message="Ocurrió un error inesperado. Por favor, inténtalo de nuevo más tarde."
+        :is-open="isErrorDefault"
+        color="danger"
+        :duration="2000"
+        :icon="wifiOutline"
+        ></ion-toast>
+
+        <!-- Modal de confirmación de registro de tu ruta -->
+        <ion-modal ref="modal" :is-open="showModalConfirm">
+            <div class="bodyModal">
+                <h2>Registro Exitoso</h2>
+                <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
+                <h3>Te has registrado de manera exitosa.</h3>
+                <ion-grid>
+                <ion-row>
+                    <ion-col>
+                    <ion-button @click="showModalConfirm = false" shape="round" color="success">
+                        Confirmar
+                    </ion-button>
+                    </ion-col>     
+                </ion-row>
+                </ion-grid>
+            </div>
+        </ion-modal>
+
+        <!-- Modal de error de tus datos FORMULARIO -->
+        <ion-modal ref="modal" :is-open="showModalErrorForm">
+            <div class="bodyModal">
+                <h2>Adevertencia</h2>
+                <ion-icon :icon="alertCircleOutline" color="warning"></ion-icon>
+                <h3>Por favor, completa todos los campos del formulario.</h3>
+                <ion-grid>
+                <ion-row>
+                    <ion-col>
+                        <ion-button @click="showModalErrorForm = false" shape="round" color="success">
+                            Aceptar
+                        </ion-button>
+                    </ion-col>     
+                </ion-row>
+                </ion-grid>
+            </div>
+        </ion-modal>
+
     </ion-page>
 </template>
   
 <script>
-import { IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonPopover } from '@ionic/vue';
 //Componentes
 import AppBarCustom from '../components/NavBarCustom.vue'
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
-import { ref } from 'vue';
+import { 
+    IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, 
+    IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage, IonPopover, IonCardHeader, 
+    IonCardSubtitle, IonCardTitle, IonGrid, IonRow, IonCol, IonText, IonIcon, IonImg
+} from '@ionic/vue';
 //Iconos
+import { cloudUploadOutline, wifiOutline, checkmarkOutline, alertCircleOutline } from 'ionicons/icons'
 //Servicios
+import AuthService from '@/Services/AuthService';
+
 export default {
     components: { 
-        AppBarCustom,
-        IonPopover,
-        IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, IonPage 
+        AppBarCustom,Loading,
+        IonPopover, IonDatetime, IonDatetimeButton, IonModal, IonInput, IonCard, IonCardContent, 
+        IonButton, IonToast, IonItem, IonList, IonTitle, IonToolbar, IonHeader, IonLabel, IonContent, 
+        IonPage, IonCardHeader, IonCardSubtitle, IonCardTitle, IonGrid, IonRow, IonCol, IonText, IonIcon, 
+        IonImg
 
     },
     name: 'RegistroUsuario',
 
     data: () => ({
+        //Iconos
+        cloudUploadOutline,
+        wifiOutline,
+        checkmarkOutline,
+        alertCircleOutline,
+
         nombreUsuario: '',
         correo: '',
         contrasenia: '',
         fechaRegistro: '',
-        mostrarToastError: false,
         showPassword: false,
         nombreCompleto: '',
         fechaNacimiento: '',
         matricula: '',
         grupo: '',
-        universidad: '',
+        universidad: 'Universidad Tecnologica de Tula-Tepeji',
         telefono: '',
         estatus: '',
         credencial: null,
         credencialPreview: null,
         mostrarSegundoFormulario: false,
-        registro: '',
+        confirmarContrasenia: '',
+
+        mensajeToast: '',
+        iconoToast: null,
+        colorToast: null,
+        
+        isLoading: false,
+        isErrorDefault: false,
+        CorreoValido: true,
+        showModalConfirm: false,
+        mostrarToastError: false,
+        showModalErrorForm: false,
+
     }),
     methods: {
         handleFileChange(event) {
@@ -180,228 +306,126 @@ export default {
                 }
             }
         },
-        validarCorreoElectronico(correo) {
-            // Expresión regular para validar el formato de correo electrónico
-            const correoRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-            return correoRegex.test(correo);
-        },
 
-        submitForm() {
-            // Variables para almacenar mensajes de error personalizados
-            let errorMessage = "";
+        validarFormulario1() {
+            const correoRegex = /@uttt\.edu\.mx$/;
 
-            // Validación de nombre de usuario
-            if (!this.nombreUsuario) {
-                errorMessage += "Por favor, ingrese el nombre de usuario.\n";
-            }
+            var isValid = correoRegex.test(this.correo);
+            var isCorrect = this.contrasenia >= 8;
+            var isEquals = this.confirmarContrasenia == this.contrasenia ;
+
+            console.log(isValid)
+            console.log(isCorrect)
+            console.log(isEquals)
 
             // Validación de correo electrónico
-            if (!this.correo) {
-                errorMessage += "Por favor, ingrese el correo electrónico.\n";
-            } else if (!this.validarCorreoElectronico(this.correo)) {
-                errorMessage += "El formato del correo electrónico no es válido.\n";
-            }
-
-            // Validación de contraseña
-            if (!this.contrasenia) {
-                errorMessage += "Por favor, ingrese la contraseña.\n";
-            } else if (this.contrasenia.length < 8) {
-                errorMessage += "La contraseña debe tener al menos 8 caracteres.\n";
-            }
-
-            // Validación de confirmación de contraseña
-            if (!this.confirmarContrasenia) {
-                errorMessage += "Por favor, ingrese la confirmación de contraseña.\n";
-            } else if (this.contrasenia !== this.confirmarContrasenia) {
-                errorMessage += "Las contraseñas no coinciden.\n";
-            }
-
-            // Verifica si hay algún mensaje de error
-            if (errorMessage) {
-                // Muestra el mensaje de error
-                this.mostrarToastError = true;
-                alert("Error: \n" + errorMessage);
-            } else {
-                // Si el primer formulario es válido, muestra el segundo formulario
+            if (isValid && isCorrect && isEquals) {
+                this.CorreoValido = true;
                 this.mostrarSegundoFormulario = true;
+            }else{
+                this.CorreoValido = false;
+                console.log("Debes ingresar un correo institucional.");
+                return;
             }
         },
 
-        async submitForm2() {
-            // Realiza la validación del segundo formulario y registra los datos
-            const imagenBase64 = await this.getBase64Image();
-            if (this.validateSecondForm()) {
-                console.log('Fecha de Nacimiento:', this.fechaNacimiento);
-
-                
-                console.log(imagenBase64);
-                function generateGuid() {
-                    let d = Date.now();
-                    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
-                        d += performance.now(); // Agregar tiempo de alta resolución si está disponible
-                    }
-                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                        const r = (d + Math.random() * 16) % 16 | 0;
-                        d = Math.floor(d / 16);
-                        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-                    });
-                };
-
-                // Función para generar el token
-                function generateToken() {
-                    // Aquí puedes implementar lógica personalizada para generar el token
-                    // Por ejemplo, puedes usar una biblioteca como jsonwebtoken o simplemente generar una cadena aleatoria única
-                    // En este ejemplo, simplemente genero una cadena aleatoria de longitud 32
-                    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-                    return token;
-                }
-
-                const formattedDate = new Date(this.fechaNacimiento).toISOString();
-
-                // Crea un objeto con los datos del usuario y datos personales
-                const usuario = {
-                    id_Usuario: generateGuid(),
-                    nombre_Usuario: this.nombreUsuario,
-                    correo: this.correo,
-                    contrasenia: this.contrasenia,
-                    token: generateToken(),
-                    fecha_Registro: new Date().toISOString(),
-                    estatus: true,
-                    registro: null
-                };
-
-                const datosPersonales = {
-                    id_DatosPersonales: generateGuid(),
-                    id_Usuario: usuario.id_Usuario,
-                    nombre_Completo: this.nombreCompleto,
-                    fecha_Nacimiento: this.fechaNacimiento,
-                    matricula: this.matricula,
-                    grupo: this.grupo,
-                    credencial: imagenBase64,
-                    universidad: this.universidad,
-                    telefono: this.telefono,
-                    correo: this.correo, // Usar el mismo correo que en el usuario si es relevante
-                    estatus: true
-                };
-
-                // Envia la solicitud al servidor para registrar al usuario y sus datos personales
-                this.registerUser(usuario, datosPersonales);
-            } else {
-               
-            }
-        },
-        validateSecondForm() {
-            // Variables para almacenar mensajes de error personalizados
+        validarFormulario2() {
+            const telefonoPattern = /^\d{10}$/;
+            const matriculaPattern = /^\d{8}$/;
             let errorMessage = "";
 
-            // Validación de nombre completo
-            if (!this.nombreCompleto) {
-                errorMessage += "Por favor, ingrese el nombre completo.\n";
-            }
+            if (!this.nombreCompleto) errorMessage += "Por favor, ingrese el nombre completo.\n";
 
-            // Validación de fecha de nacimiento (puedes personalizar el mensaje de error)
-            if (!this.fechaNacimiento) {
-                errorMessage += "Por favor, ingrese la fecha de nacimiento.\n";
-            }
+            if (!this.fechaNacimiento)  errorMessage += "Por favor, ingrese la fecha de nacimiento.\n";
+            
+            if (!matriculaPattern.test(this.matricula)) errorMessage += "La matrícula debe contener exactamente 8 dígitos numéricos.\n";
+            
+            if (!this.grupo) errorMessage += "Por favor, ingrese el grupo.\n";
+            
+            if (!telefonoPattern.test(this.telefono)) errorMessage += "El teléfono debe contener exactamente 10 dígitos numéricos.\n";
+            
+            //if(!this.credencial) errorMessage += "La crendecial es requerida.\n";
+            
+            if (errorMessage == "") return true;
+            
+            return false;
+        },
 
-            // Validación de matrícula: Debe ser numérica y tener exactamente 8 dígitos
-            const matriculaPattern = /^\d{8}$/;
-            if (!this.matricula) {
-                errorMessage += "Por favor, ingrese la matrícula.\n";
-            } else if (!matriculaPattern.test(this.matricula)) {
-                errorMessage += "La matrícula debe contener exactamente 8 dígitos numéricos.\n";
+        generateGuid() {
+            let d = Date.now();
+            if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+                d += performance.now(); // Agregar tiempo de alta resolución si está disponible
             }
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = (d + Math.random() * 16) % 16 | 0;
+                d = Math.floor(d / 16);
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        },
 
-            // Validación de grupo (puedes personalizar el mensaje de error)
-            if (!this.grupo) {
-                errorMessage += "Por favor, ingrese el grupo.\n";
+        async registrarUsuario(){
+            try{
+                this.isErrorDefault = false;
+                this.isLoading = true;
+                if(this.validarFormulario2()){
+                    this.mostrarToastError = false;
+                    //const imagenBase64 = await this.getBase64Image();
+
+                    const request = {
+                        usuario: {
+                            id_Usuario: this.generateGuid(),
+                            nombre_Usuario: this.nombreCompleto.trim(),
+                            correo: this.correo.trim(),
+                            contrasenia: this.contrasenia.trim(),
+                            fecha_Registro: new Date(),
+                            estatus: true,
+                            token: null,
+                            registro: null
+                        },
+                        datosPersonales: {
+                            id_DatosPersonales: this.generateGuid(),
+                            id_Usuario: this.generateGuid(),
+                            nombre_Completo: this.nombreCompleto.trim(),
+                            fecha_Nacimiento: this.fechaNacimiento.trim(),
+                            matricula: this.matricula.trim(),
+                            grupo: this.grupo.trim(),
+                            credencial: 'sin credencial',
+                            universidad: this.universidad.trim(),
+                            telefono: this.telefono.trim(),
+                            correo: this.correo.trim(),
+                            estatus: true
+                        }
+                    };
+
+                    const response = await AuthService.registro(request);
+                    console.log(response)
+                    setTimeout(() => {
+                        if(response.status == 200 || response.status == 201){
+                            this.isLoading = false;
+                            this.showModalConfirm = true;
+                            this.limpiarFormulario();
+                            this.mostrarSegundoFormulario = false;
+                        }
+                    }, 3000);
+
+                }else{
+                    //DATOS INCOMPLETOS
+                    this.isLoading = false;
+                    this.showModalErrorForm = true;
+                }
+
             }
-
-            // Validación de universidad (puedes personalizar el mensaje de error)
-            if (!this.universidad) {
-                errorMessage += "Por favor, ingrese la universidad.\n";
-            }
-
-            // Validación de teléfono: Debe ser numérico y tener exactamente 10 dígitos
-            const telefonoPattern = /^\d{10}$/;
-            if (!this.telefono) {
-                errorMessage += "Por favor, ingrese el teléfono.\n";
-            } else if (!telefonoPattern.test(this.telefono)) {
-                errorMessage += "El teléfono debe contener exactamente 10 dígitos numéricos.\n";
-            }
-
-            // Validación de estatus (puedes personalizar el mensaje de error)
-            if (!this.estatus) {
-                errorMessage += "Por favor, ingrese el estatus.\n";
-            }
-
-            // Verifica si hay algún mensaje de error
-            if (errorMessage) {
-                // Muestra el mensaje de error
-                alert("Error: \n" + errorMessage);
-                return false;
-            } else {
-                // Si el segundo formulario es válido, devuelve true
-                return true;
+            catch(error){
+                console.log("Error: " + error)
+                this.isLoading = false;
+                this.isErrorDefault = true;
             }
         },
 
-        regresarAlPrimerFormulario() {
-            // Oculta el segundo formulario y muestra el primer formulario
-            this.mostrarSegundoFormulario = false;
-        },
-        togglePasswordVisibility() {
-            this.showPassword = !this.showPassword;
-            const inputElement = this.$refs.contraseniaInput.$el.querySelector('input');
-            if (inputElement) {
-                inputElement.type = this.showPassword ? 'text' : 'password';
-            }
-        },
-
-        togglePasswordVisibility2() {
-            this.showPassword2 = !this.showPassword2;
-            const inputElement = this.$refs.confirmarContraseniaInput.$el.querySelector('input');
-            if (inputElement) {
-                inputElement.type = this.showPassword2 ? 'text' : 'password';
-            }
-        },
-
-        registerUser(usuario, datosPersonales) {
-            // Envía la solicitud de registro al servidor
-            fetch("https://localhost:7038/api/Auth/RegistrarUsuario", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ usuario, datosPersonales })
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("No se pudo registrar el usuario");
-                    }
-                    alert("Registro Exitoso");
-                    // Restablece los valores a vacío
-                    this.nombreUsuario = '';
-                    this.correo = '';
-                    this.contrasenia = '';
-                    this.confirmarContrasenia = '';
-                    this.fechaNacimiento = '';
-                    this.matricula = '';
-                    this.grupo = '';
-                    this.universidad = '';
-                    this.telefono = '';
-                    this.estatus = '';
-                    this.credencial = null;
-                    this.credencialPreview = null;
-                    this.mostrarSegundoFormulario = false;
-                })
-                .catch(error => {
-                    alert(error.message);
-                });
-        },
         getBase64StringFromDataURL(dataURL) {
             return dataURL.replace('data:', '').replace(/^.+,/, '');
         },
+
         async getBase64Image() {
             return new Promise((resolve) => {
                 const image = new Image();
@@ -423,15 +447,40 @@ export default {
                 };
             });
         },
+
+        validarCorreoElectronico(correo) {
+            // Expresión regular para validar el formato de correo electrónico
+            const correoRegex = /@uttt\.edu\.mx$/;
+            if(correoRegex.test(correo))
+                this.CorreoValido = true; 
+
+            return correoRegex.test(correo);
+        },
+
+        limpiarFormulario(){
+            this.nombreUsuario = '';
+            this.correo = '';
+            this.contrasenia = '';
+            this.confirmarContrasenia = '';
+            this.fechaNacimiento = '';
+            this.matricula = '';
+            this.grupo = '';
+            this.universidad = '';
+            this.telefono = '';
+            this.estatus = '';
+            this.credencial = null;
+            this.credencialPreview = null;
+            this.mostrarSegundoFormulario = false;
+        },
+
+        goToLogin(){
+            this.$router.push('/login')
+        }
     }
 }
 </script>
   
 <style scoped>
-.ion-card-small {
-    max-width: 700px;
-    margin: 0 auto;
-}
 
 ion-card {
     margin: 10px;
@@ -440,75 +489,71 @@ ion-card {
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
 }
 
-ion-button {
-    margin-top: 10px;
+.cardForm1 {
+    max-width: 500px;
+    margin: 0 auto;
 }
-
-ion-item.rounded-item {
-    border-radius: 10px;
-    margin-bottom: 10px;
+ion-card-header {
+    text-align: center;
 }
-
-ion-label.custom-label {
-    width: 40%;
-    text-align: right;
-    margin-right: 20px;
-}
-
-ion-input.custom-input {
-    width: 60%;
-    border-radius: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border: 2px solid #ccc;
-}
-
-ion-input.custom-input-password {
-    width: 55%;
-    border-radius: 10px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border: 2px solid #ccc;
-}
-
-.custom-button {
-    border-radius: 10px;
-    --color: #F5FCCD;
-    --background: #034561;
-    font-size: 14px;
-    padding: 8px 16px;
-}
-
-.custom-input-border-color-1 {
-    border: 2px solid #F5FCCD;
-}
-
-.custom-input-border-color-2 {
-    border: 2px solid #4FB783;
-}
-
-.custom-input-border-color-3 {
-    border: 2px solid #409D9B;
-}
-
 ion-item {
     --border-width: 0;
     /* Elimina el borde */
     --inner-border-width: 0;
     /* Elimina el borde interno */
 }
+.login-image {
+    display: block;
+    margin: 0 auto;
+    max-width: 150px;
+    height: 100px;
+    /* border-radius: 100px; */
+}
+.colImage{
+    text-align: center;
+}
+.image-upload {
+  margin: 0 auto; 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #4FB783;
+}
+.image-upload ion-input {
+  display: none;
+}
+.image-upload ion-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+.botonesRegistro {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+ion-img {
+    margin: 0 auto;
+    width: 300px;
+    height: 200px;
+}
+ion-modal {
+  --width: fit-content;
+  --height: fit-content;
+  --border-radius: 10px;
+}
 
-.custom-eye-button {
-    /* Establece el color de fondo y el color del borde del botón */
-    --background: #034561;
-    /* Color de fondo personalizado 4FB783*/
-    --border-color: #4FB783;
-    /* Color del borde personalizado 034561*/
-    /* Personaliza otros estilos según tus preferencias */
-    border-radius: 10px;
-    font-size: 16px;
-    width: 40px;
-    height: 40px;
+.bodyModal {
+  padding: 10px;
+  text-align: center;
+}
+
+.bodyModal ion-icon {
+  font-size: 36px;
 }
 </style>
   
