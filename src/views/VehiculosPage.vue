@@ -6,7 +6,7 @@
         <ion-content class="ion-padding">
             <ion-card class="cardVehiculo">
                 <ion-card-header>
-                    <ion-card-title>Registra tu Vehiculo</ion-card-title>
+                    <ion-card-title>Registra tu Vehículo</ion-card-title>
                     <ion-card-subtitle>Ingresa toda la información</ion-card-subtitle>
                 </ion-card-header>
                 <ion-card-content>
@@ -37,9 +37,9 @@
                         <br>
                         <ion-row>
                             <ion-col class="colImage">
-                                <ion-card-title>Fotografia de Referencia</ion-card-title>
+                                <ion-card-title>Fotografía de Referencia</ion-card-title>
                                 <ion-card-subtitle>
-                                    Agrega una imagen de referencia, para mayor facilidad de ubicar tu Vehiculo a los demas.
+                                    Agrega una imagen de referencia, para mayor facilidad de ubicar tu Vehículo a los demás.
                                 </ion-card-subtitle>
                             </ion-col>
                         </ion-row>
@@ -82,7 +82,7 @@
         <div class="bodyModal">
             <h2>Registro Exitoso</h2>
             <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
-            <h3>Tu vehiculo ahora se encuentra publicado.</h3>
+            <h3>Tu vehículo ahora se encuentra publicado.</h3>
             <ion-grid>
             <ion-row>
                 <ion-col>
@@ -100,7 +100,7 @@
         <div class="bodyModal">
             <h2>Advertencia</h2>
             <ion-icon :icon="alertOutline" color="warning"></ion-icon>
-            <h3>Solo puedes publicar 2 vehiculos y actualmente excedes el limite, borra una para continuar.</h3>
+            <h3>Solo puedes publicar 2 vehículos y actualmente excedes el límite, borra una para continuar.</h3>
             <ion-grid>
             <ion-row>
                 <ion-col>
@@ -117,7 +117,7 @@
         <ion-toast 
         position="top" 
         position-anchor="header" 
-        message="Ocurrio un error intenta mas tarde."
+        message="Ocurrio un error intenta más tarde."
         :is-open="isErrorVehiculo"
         color="danger"
         :duration="2000"

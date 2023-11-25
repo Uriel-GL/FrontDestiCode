@@ -22,14 +22,14 @@
                                 <ion-input label="Correo Electrónico" v-model="correo" type="email" label-placement="floating" fill="outline" color="success"></ion-input>
                                 <ion-text color="danger" v-if="!CorreoValido"
                                     style="text-align: center">
-                                    El correo no es valido
+                                    El correo no es válido
                                 </ion-text>
                             </ion-col>
                             <ion-col size="12">
                                 <ion-input label="Contraseña" type="password" v-model="contrasenia" label-placement="floating" fill="outline" color="success"></ion-input>
                                 <ion-text color="danger" v-if="contrasenia && contrasenia.length < 8"
                                     style="text-align: center">
-                                    La contraseña debe tener minimo 8 caracteres
+                                    La contraseña debe tener mínimo 8 caracteres
                                 </ion-text>
                             </ion-col>
                             <ion-col size="12">
@@ -81,13 +81,13 @@
                             </ion-col>
                             <ion-col size="12">
                                 <ion-input label="Telefono" label-placement="floating"
-                                placeholder="Ingresa tu número de telefono" 
+                                placeholder="Ingresa tu número de teléfono" 
                                 fill="outline" color="success"
                                 v-model="telefono">
                                 </ion-input>
                                 <ion-text color="danger" v-if="telefono && telefono.length < 10"
                                     style="text-align: center">
-                                    El núm debe ser minimo de 10 digitos.
+                                    El núm debe ser mínimo de 10 dígitos.
                                 </ion-text>
                             </ion-col>
                             <ion-col size="6">
@@ -103,13 +103,13 @@
                             </ion-col>
                             <ion-col size="6">
                                 <ion-input label="Matricula" label-placement="floating"
-                                placeholder="Ingresa tu núm de Matricula"
+                                placeholder="Ingresa tu núm de Matrícula"
                                 fill="outline" color="success"
                                 v-model="matricula">
                                 </ion-input>
                                 <ion-text color="danger" v-if="matricula && matricula.length < 8"
                                     style="text-align: center">
-                                    La matricula debe minimo de 8 digitos.
+                                    La matrícula debe mínimo de 8 dígitos.
                                 </ion-text>
                             </ion-col>
                             <ion-col size="12">
@@ -132,7 +132,7 @@
                         <br>
                         <!-- <ion-row>
                             <ion-col class="colImage">
-                                <ion-card-title>Fotografia de Referencia</ion-card-title>
+                                <ion-card-title>Fotografía de Referencia</ion-card-title>
                                 <ion-card-subtitle>
                                     Agrega una imagen de tu credencial de la UT, para validar tus datos.
                                 </ion-card-subtitle>
@@ -269,7 +269,7 @@ export default {
         fechaNacimiento: '',
         matricula: '',
         grupo: '',
-        universidad: 'Universidad Tecnologica de Tula-Tepeji',
+        universidad: 'Universidad Tecnológica de Tula-Tepeji',
         telefono: '',
         estatus: '',
         credencial: null,

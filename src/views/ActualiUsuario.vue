@@ -26,7 +26,7 @@
                 <ion-input label="Correo Electrónico" v-model="user.correo" type="email" label-placement="floating"
                   fill="outline" color="success"></ion-input>
                 <ion-text color="danger" v-if="!CorreoValido" style="text-align: center">
-                  El correo no es valido
+                  El correo no es válido
                 </ion-text>
               </ion-col>
 
@@ -34,7 +34,7 @@
                 <ion-input label="Contraseña" type="text" v-model="contrasenia" label-placement="floating" fill="outline"
                   color="success"></ion-input>
                 <ion-text color="danger" v-if="contrasenia && contrasenia.length < 8" style="text-align: center">
-                  La contraseña debe tener minimo 8 caracteres
+                  La contraseña debe tener mínimo 8 caracteres
                 </ion-text>
               </ion-col>
 
@@ -62,7 +62,7 @@
                   color="success" v-model="user.telefono">
                 </ion-input>
                 <ion-text color="danger" v-if="user.telefono && user.telefono.length < 10" style="text-align: center">
-                  El núm debe ser minimo de 10 digitos.
+                  El núm. debe ser mínimo de 10 dígitos.
                 </ion-text>
               </ion-col>
 
@@ -80,7 +80,7 @@
                   color="success" v-model="user.matricula">
                 </ion-input>
                 <ion-text color="danger" v-if="user.matricula && user.matricula.length < 8" style="text-align: center">
-                  La matricula debe minimo de 8 digitos.
+                  La matrícula debe mínimo de 8 dígitos.
                 </ion-text>
               </ion-col>
 
@@ -187,9 +187,9 @@
     <!-- Modal de error de tus datos FORMULARIO -->
     <ion-modal ref="modal" :is-open="showModalError">
         <div class="bodyModal">
-            <h2>Adevertencia</h2>
+            <h2>Advertencia</h2>
             <ion-icon :icon="alertCircleOutline" color="warning"></ion-icon>
-            <h3>Algunos datos no son validos verificalos para continuar.</h3>
+            <h3>Algunos datos no son válidos verifícalos para continuar.</h3>
             <ion-grid>
             <ion-row>
                 <ion-col>

@@ -7,7 +7,7 @@
         <ion-toast 
           position="top" 
           position-anchor="header" 
-          message="Credenciales Invalidas."
+          message="Credenciales Inválidas."
           :is-open="isErrorLogin"
           color="danger"
           :duration="2000"
@@ -40,7 +40,7 @@
           <ion-progress-bar type="indeterminate" v-if="isLoading"></ion-progress-bar>
           <ion-card-header>
             <ion-card-title>Bienvenido</ion-card-title>
-            <ion-card-subtitle>Ingresa tu Email y contraseña</ion-card-subtitle>
+            <ion-card-subtitle>Ingresa tu Email y Contraseña</ion-card-subtitle>
           </ion-card-header>
           <img
             src="https://firebasestorage.googleapis.com/v0/b/tiendaservicios-b7281.appspot.com/o/Imagenes%2FLogo.jpg?alt=media&token=045bb3d8-886b-4b6e-af3d-1c55197c9594"
@@ -60,7 +60,7 @@
                   type="email" 
                   required>
                   </ion-input>
-                  <span v-if="!isValidCorreo && inputTouchedCorreo"><ion-text color="danger">Correo Invalido</ion-text></span>
+                  <span v-if="!isValidCorreo && inputTouchedCorreo"><ion-text color="danger">Correo Inválido</ion-text></span>
                 </ion-col>
 
                 <ion-col size="12">
@@ -73,7 +73,7 @@
                   required placeholder="Ingresa tu contraseña" 
                   fill="outline">
                   </ion-input>
-                  <span v-if="!isValidContra && inputTouchedContra"><ion-text color="danger">Contraseña Invalida</ion-text></span>
+                  <span v-if="!isValidContra && inputTouchedContra"><ion-text color="danger">Contraseña Inválida</ion-text></span>
                 </ion-col>
 
                 <ion-col>

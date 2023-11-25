@@ -72,7 +72,7 @@
           <ion-card-content>
             <div class="bodyRutasExis ion-text-center">
               <ion-icon :icon="navigateOutline"></ion-icon>
-                <h2>Actualmente no hay rutas para tus datos de busqueda</h2> 
+                <h2>Actualmente, no hay rutas para tus datos de búsqueda</h2> 
             </div>
           </ion-card-content>
         </ion-card>
