@@ -15,7 +15,7 @@
                         <ion-card-title>{{ this.ruta.lugar_Destino }}</ion-card-title>
                     </ion-card-header>
 
-                    <h5>Vehiculo de Trasporte</h5>
+                    <h5>Vehículo de Transporte</h5>
                     <div class="imgCar">
                         <ion-img :src="this.vehiculo.imagen">
                         </ion-img>
@@ -43,7 +43,7 @@
 
                             <ion-card>
                                 <ion-card-header>
-                                    <ion-card-title>Datos del Vehiculo</ion-card-title>
+                                    <ion-card-title>Datos del Vehículo</ion-card-title>
                                 </ion-card-header>
                                 <ion-card-content>
                                     <ion-item>
@@ -146,7 +146,7 @@
                 <div class="bodyModal">
                     <h2>Error al reservar</h2>
                     <ion-icon :icon="closeOutline" color="success"></ion-icon>
-                    <h3>No pudimos reservar tu lugar, intenta mas tarde.</h3>
+                    <h3>No pudimos reservar tu lugar, intenta más tarde.</h3>
                     <ion-grid>
                     <ion-row>
                         <ion-col>

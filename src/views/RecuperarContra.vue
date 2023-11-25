@@ -13,14 +13,14 @@
                 <ion-card-content>
                     <div v-if="!CodigoValido">
                         <h2>
-                            Ingresa el correo con el que te registraste y te enviaremos un codigo para que puedas 
+                            Ingresa el correo con el que te registraste y te enviaremos un código para que puedas 
                             restablecer tu contraseña.
                         </h2>
                         <br>
                         <ion-input
-                        label="Correo Electronico"
+                        label="Correo Electrónico"
                         label-placement="floating"
-                        placeholder="Ingresa un correo valido"
+                        placeholder="Ingresa un correo válido"
                         fill="outline"
                         color="success"
                         type="email"
@@ -45,7 +45,7 @@
                         <ion-row>
                             <ion-col size="12">
                                 <ion-input
-                                label="Correo Electronico"
+                                label="Correo Electrónico"
                                 label-placement="floating"
                                 placeholder="Ingresa de nuevo tu correo"
                                 fill="outline"
@@ -57,9 +57,9 @@
                             </ion-col>
                             <ion-col size="12">
                                 <ion-input
-                                label="Codigo"
+                                label="Código"
                                 label-placement="floating"
-                                placeholder="Ingresa el codigo que te enviamos"
+                                placeholder="Ingresa el código que te enviamos"
                                 fill="outline"
                                 color="success"
                                 type="text"
@@ -104,7 +104,7 @@
                     
                     
                     <ion-button fill="clear" shape="round" expand="full" @click="CodigoValido = true">
-                        ¿Ya tienes tu codigo?
+                        ¿Ya tienes tu código?
                     </ion-button>
 
                 </ion-card-content>
@@ -116,7 +116,7 @@
         <div class="bodyModal">
             <h2>Envio Exitoso</h2>
             <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
-            <h3>Te enviamos a tu correo un codigo para que puedas recuperar tu contraseña.</h3>
+            <h3>Te enviamos a tu correo un código para que puedas recuperar tu contraseña.</h3>
             <h4>Revisa tu bandeja de entrada o spam.</h4>
             <ion-grid>
             <ion-row>
@@ -152,7 +152,7 @@
         <ion-toast 
           position="bottom" 
           position-anchor="header" 
-          message="Ocurrio un error al intentar conectar con el servidor, intenta mas tarde."
+          message="Ocurrio un error al intentar conectar con el servidor, intenta más tarde."
           :is-open="isErrorConnection"
           color="danger"
           :duration="2000"
@@ -267,14 +267,14 @@ export default {
         validar(){
             this.isErrorPass = false;
             if(!this.request.Correo){
-                this.mensajeToast = "Ingresa un correo valido."
+                this.mensajeToast = "Ingresa un correo válido."
                 this.isLoading = false;
                 this.isErrorPass = true;
                 return;
             }
 
             if(this.request.Token.length < 36){
-                this.mensajeToast = "Ingresa un codigo valido."
+                this.mensajeToast = "Ingresa un código válido."
                 this.isLoading = false;
                 this.isErrorPass = true;
                 return
