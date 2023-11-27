@@ -1,13 +1,13 @@
 <template>
     <ion-page>
-        <app-bar-custom title="Datos de tu Vehiculo"></app-bar-custom>
+        <app-bar-custom title="Datos de tu Vehículo"></app-bar-custom>
         <loading :active="isLoading" :can-cancel="false" :is-full-page="fullPage" />
 
         <ion-content class="ion-padding">
             <!-- Card para actualizar la info del vehiculo -->
             <ion-card class="cardVehiculo">
                 <ion-card-header>
-                    <ion-card-title>Actualiza tu Vehiculo</ion-card-title>
+                    <ion-card-title>Actualiza tu Vehículo</ion-card-title>
                     <ion-card-subtitle>Ingresa toda la información</ion-card-subtitle>
                 </ion-card-header>
                 <ion-card-content>
@@ -38,7 +38,7 @@
                         <br>
                         <ion-row>
                             <ion-col class="colImage">
-                                <ion-card-title>Fotografia de Referencia</ion-card-title>
+                                <ion-card-title>Fotografía de Referencia</ion-card-title>
                                 <ion-card-subtitle>
                                     Cambia la imagen de referencia, en caso de ser necesario.
                                 </ion-card-subtitle>
@@ -82,7 +82,7 @@
             <div class="bodyModal">
                 <h2>Actualización Exitosa</h2>
                 <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
-                <h3>Los datos de tu vehiculo fueron actualizados.</h3>
+                <h3>Los datos de tu vehículo fueron actualizados.</h3>
                 <ion-grid>
                 <ion-row>
                     <ion-col>
@@ -100,7 +100,7 @@
             <div class="bodyModal">
                 <h2>Error al actualizar</h2>
                 <ion-icon :icon="closeOutline" color="success"></ion-icon>
-                <h3>No pudimos actualizar tu vehiculo, intenta mas tarde.</h3>
+                <h3>No pudimos actualizar tu vehículo, intenta más tarde.</h3>
                 <ion-grid>
                 <ion-row>
                     <ion-col>
@@ -209,9 +209,9 @@ export default {
         validarFormulario(){
             let errorMessage = "";
 
-            if(!this.color || this.color.length <= 2) errorMessage += "Ingresa un color valido."
+            if(!this.color || this.color.length <= 2) errorMessage += "Ingresa un color válido."
 
-            if(!this.placa || this.placa.length <= 2) errorMessage += "El número de placa es invalido."
+            if(!this.placa || this.placa.length <= 2) errorMessage += "El número de placa es inválido."
 
             if(!this.modelo || this.modelo.length <= 2) errorMessage += "El modelo es requerido"
 

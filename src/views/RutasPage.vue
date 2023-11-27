@@ -18,7 +18,7 @@
           </ion-card-header>
           <ion-card-content>
             <ion-icon class="carIcon" :icon="carOutline"></ion-icon>
-            <h1>Actualmente no cuentas con un vehiculo registrado</h1>
+            <h1>Actualmente no cuentas con un vehículo registrado</h1>
             <br>
             <h2>Registra uno si quieres publicar una ruta</h2>
             <br>
@@ -97,8 +97,8 @@
               </ion-grid>
 
               <br>
-              <ion-card-title>¿Que vehículo utilizaras?</ion-card-title>
-              <ion-card-subtitle>Seleccionalo</ion-card-subtitle>
+              <ion-card-title>¿Qué vehículo utilizarás?</ion-card-title>
+              <ion-card-subtitle>Selecciónalo</ion-card-subtitle>
 
               <ion-grid>
                 <ion-row>
@@ -176,7 +176,7 @@
       <div class="bodyModal">
         <h2>Advertencia</h2>
         <ion-icon :icon="alertOutline" color="warning"></ion-icon>
-        <h3>Solo puedes publicar 2 rutas y actualmente excedes el limite, borra una para continuar </h3>
+        <h3>Solo puedes publicar 2 rutas y actualmente excedes el límite, borra una para continuar </h3>
         <ion-grid>
           <ion-row>
             <ion-col>
@@ -317,7 +317,7 @@ export default {
 
       if(!this.nuevaRuta.Costo) errorMessage += "El costo es requerido";
 
-      if(!this.nuevaRuta.Id_Unidad) errorMessage += "El vehiculo es obligatorio";
+      if(!this.nuevaRuta.Id_Unidad) errorMessage += "El vehículo es obligatorio";
 
       if(errorMessage == "") return true;
 

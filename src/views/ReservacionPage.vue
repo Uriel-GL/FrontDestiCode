@@ -59,7 +59,7 @@
                               <ion-text><b>{{ formatoFecha(ticket.rutas.fecha_Salida) }}</b></ion-text>
                             </ion-col>
                             <ion-col size="4">
-                              <ion-text>Num Ticket</ion-text>
+                              <ion-text>Núm. Ticket</ion-text>
                               <div class="barcode"></div>
                             </ion-col>
                             <ion-col class="colEliminar">
@@ -168,7 +168,7 @@
                 <ion-label>
                   <h2>{{ user.nombre_Usuario }}</h2>
                   <p>Grupo: {{ user.datosPersonales[0].grupo }}</p>
-                  <p>Telefono: {{ user.datosPersonales[0].telefono }}</p>
+                  <p>Teléfono: {{ user.datosPersonales[0].telefono }}</p>
                 </ion-label>
               </ion-item>
             </ion-list>
@@ -180,7 +180,7 @@
           <div class="bodyModal">
             <h2>Eliminar Ruta</h2>
             <ion-icon :icon="trashOutline" color="danger"></ion-icon>
-            <h3>Estar por eliminar tu ruta<br>¿Estas seguro?</h3>
+            <h3>Estás por eliminar tu ruta<br>¿Estás seguro?</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -201,7 +201,7 @@
           <div class="bodyModal">
             <h2>Eliminación Exitosa</h2>
             <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
-            <h3>Se elimino tu ruta.</h3>
+            <h3>Se eliminó tu ruta.</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -219,7 +219,7 @@
           <div class="bodyModal">
             <h2>Cancelar Reservación</h2>
             <ion-icon :icon="trashOutline" color="danger"></ion-icon>
-            <h3>Estar por cancelar tu reservación<br>¿Estas seguro?</h3>
+            <h3>Estás por cancelar tu reservación<br>¿Estás seguro?</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -240,7 +240,7 @@
           <div class="bodyModal">
             <h2>Cancelación Exitosa</h2>
             <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
-            <h3>Se cancelo tu lugar en la ruta.</h3>
+            <h3>Se canceló tu lugar en la ruta.</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -258,7 +258,7 @@
           <div class="bodyModal">
             <h2>Error al reservar</h2>
             <ion-icon :icon="closeOutline" color="danger"></ion-icon>
-            <h3>No pudimos reservar tu lugar, intenta mas tarde.</h3>
+            <h3>No pudimos reservar tu lugar, intenta más tarde.</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -275,7 +275,7 @@
         <ion-toast 
           position="top" 
           position-anchor="header" 
-          message="Ocurrio un error intenta mas tarde."
+          message="Ocurrio un error intenta más tarde."
           :is-open="isErrorData"
           color="danger"
           :duration="3000"

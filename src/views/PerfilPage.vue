@@ -26,7 +26,7 @@
 
             <ion-item>
               <ion-icon :icon="callOutline" slot="start"></ion-icon>
-              <ion-label>Telefono</ion-label>
+              <ion-label>Teléfono</ion-label>
               <b>{{ datosP.telefono }}</b>
             </ion-item>
             <ion-item>
@@ -41,15 +41,15 @@
             </ion-item>
             <ion-item>
               <ion-icon :icon="idCardOutline" slot="start"></ion-icon>
-              <ion-label>Matricula</ion-label>
+              <ion-label>Matrícula</ion-label>
               <b>{{ datosP.matricula }}</b>
             </ion-item>
 
             <br>
-            <ion-card-title>Vehiculos Registrados</ion-card-title>
+            <ion-card-title>Vehículos Registrados</ion-card-title>
             <ion-list>
               <ion-item v-if="vehiculos.length == 0">
-                <ion-label>Agregar Vehiculo</ion-label>
+                <ion-label>Agregar Vehículo</ion-label>
                 <ion-button fill="clear" shape="round" color="success" @click="goToVehiculos">
                   <ion-icon style="font-size: 26px;" :icon="addCircleOutline" slot="icon-only"></ion-icon>
                 </ion-button>
@@ -80,7 +80,7 @@
         <div class="bodyModal">
           <h2>Salir</h2>
             <ion-icon :icon="sadOutline" ></ion-icon>
-              <h3>Estas por cerrar sesion. <br>¿Estas Seguro?</h3>
+              <h3>Estas por cerrar sesión. <br>¿Estas Seguro?</h3>
               <ion-grid>
                 <ion-row>
                   <ion-col>
@@ -99,9 +99,9 @@
       <!-- Modal de confirmación de eliminar unidad -->
       <ion-modal ref="modal" :is-open="showModalConfirmDelete">
         <div class="bodyModal">
-            <h2>Eliminar Vehiculo</h2>
+            <h2>Eliminar Vehículo</h2>
             <ion-icon :icon="trashOutline" color="danger"></ion-icon>
-            <h3>Estar por eliminar tu vehiculo<br>¿Estas seguro?</h3>
+            <h3>Estar por eliminar tu vehículo.<br>¿Estas seguro?</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -122,7 +122,7 @@
         <div class="bodyModal">
             <h2>Eliminación Exitosa</h2>
             <ion-icon :icon="checkmarkOutline" color="success"></ion-icon>
-            <h3>Tu vehiculo fue eliminado.</h3>
+            <h3>Tu vehículo fue eliminado.</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -140,7 +140,7 @@
         <div class="bodyModal">
             <h2>Error</h2>
             <ion-icon :icon="closeOutline" color="danger"></ion-icon>
-            <h3>No pudimos eliminar tu vehiculo, intenta mas tarde.</h3>
+            <h3>No pudimos eliminar tu vehículo, intenta más tarde.</h3>
             <ion-grid>
               <ion-row>
                 <ion-col>
@@ -175,7 +175,7 @@
       <ion-toast 
         position="top" 
         position-anchor="header" 
-        message="Ocurrio un error intenta mas tarde."
+        message="Ocurrió un error intenta más tarde."
         :is-open="isErrorPerfil"
         color="danger"
         :duration="2000"
