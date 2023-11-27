@@ -195,21 +195,16 @@ export default {
 
     methods: {
         async cargarDatos(){
-            var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
-            if(SessionValid){
-                var Id_Unidad = this.$route.params.id
-                const response = await VehiculoService.getVehiculoById(Id_Unidad)
-                this.id_Unidad = Id_Unidad;
-                this.id_Usuario = this.$cookies.get('Usuario')
-                this.color = response.data.color;
-                this.placa = response.data.placa;
-                this.modelo = response.data.modelo;
-                this.imagen = response.data.imagen;
-                this.imagenPreview = response.data.imagen;
-                console.log(response)
-            }else {
-                this.$router.push('/login')
-            }
+            var Id_Unidad = this.$route.params.id
+            const response = await VehiculoService.getVehiculoById(Id_Unidad)
+            this.id_Unidad = Id_Unidad;
+            this.id_Usuario = this.$cookies.get('Usuario')
+            this.color = response.data.color;
+            this.placa = response.data.placa;
+            this.modelo = response.data.modelo;
+            this.imagen = response.data.imagen;
+            this.imagenPreview = response.data.imagen;
+            console.log(response)
         },
         validarFormulario(){
             let errorMessage = "";

@@ -153,6 +153,24 @@
         </div>
       </ion-modal>
 
+      <!-- Modal de advertencia de eliminación vehiculo -->
+      <ion-modal ref="modal" :is-open="showAlertDelete">
+        <div class="bodyModal">
+            <h2>Advertencia</h2>
+            <ion-icon :icon="alertCircleOutline" color="danger"></ion-icon>
+            <h3>No pudimos eliminar tu vehículo ya que actualmente se encuentra registrado en una ruta</h3>
+            <ion-grid>
+              <ion-row>
+                <ion-col>
+                  <ion-button @click="showAlertDelete = false" shape="round" color="success">
+                    Aceptar
+                  </ion-button>
+                </ion-col>     
+              </ion-row>
+            </ion-grid>
+        </div>
+      </ion-modal>
+
       <!-- Totas de error en la api invalidas -->
       <ion-toast 
         position="top" 
@@ -181,11 +199,13 @@ import {
 //Iconos
 import { 
   callOutline, mailOutline, schoolOutline, idCardOutline, todayOutline, createOutline, exitOutline,
-  trashOutline, carOutline, sadOutline, closeOutline, checkmarkOutline, addCircleOutline, wifiOutline
+  trashOutline, carOutline, sadOutline, closeOutline, checkmarkOutline, addCircleOutline, wifiOutline,
+  alertCircleOutline
 } from 'ionicons/icons'
 //Servicios
 import UsuarioService from '../Services/UsuarioService'
 import VehiculoService from '@/Services/VehiculoService'
+import RutaService from '@/Services/RutaService';
 export default {
   components: {
     NavBarCustomVue, Loading,
@@ -210,12 +230,14 @@ export default {
     checkmarkOutline,
     addCircleOutline,
     wifiOutline,
+    alertCircleOutline,
 
     isErrorPerfil: false,
     showModalConfirm: false,
     showModalConfirmDelete: false,
     showModalSuccess: false,
     showModalError: false,
+    showAlertDelete: false,
     isLoading: false,
     isRefresh: false, 
 
@@ -232,6 +254,7 @@ export default {
   methods: {
     async cargarDatos(){
       try{
+        this.isErrorPerfil = false;
         var SesionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario')
         if(SesionValid){
           const response = await UsuarioService.getUserInfo(this.$cookies.get('Usuario'))
@@ -250,6 +273,10 @@ export default {
     },
 
     cerrarSesion() {
+      localStorage.removeItem('AccessTokenLocal');
+      localStorage.removeItem('UsuarioLocal');
+      localStorage.clear();
+
       this.$cookies.remove('AccessToken')
       this.$cookies.remove('Usuario')
       this.showModalConfirm = false    
@@ -274,6 +301,17 @@ export default {
     async eliminarVehiculo(){
       this.isLoading = true;
       this.showModalConfirmDelete = false;
+
+      const responseVehiculo = await RutaService.getRutaByIdUsuario(this.$cookies.get('Usuario'))
+      var unidadEnRuta = responseVehiculo.data.some(ruta => ruta.id_Unidad === this.unidad)
+      console.log("Vehiculo en ruta: " + unidadEnRuta)
+
+      if(unidadEnRuta == true){
+        this.isLoading = false;
+        this.showAlertDelete = true;
+        return;
+      }
+      
       const response = await VehiculoService.deleteVehiculo(this.unidad);
       
       setTimeout(() => {
