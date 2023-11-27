@@ -136,7 +136,8 @@ import 'vue-loading-overlay/dist/css/index.css';
 //Ionic
 import {
     IonInput, IonText, IonCard, IonCardContent, IonButton, IonImg, IonTitle, IonToolbar, IonHeader,
-    IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol, IonToast
+    IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol, IonToast,
+    IonCardTitle, IonCardSubtitle, IonCardHeader, IonModal, IonIcon
 } from '@ionic/vue';
 //Iconos
 import { 
@@ -149,7 +150,7 @@ export default {
         AppBarCustom,Loading,
         IonInput, IonText, IonCard, IonCardContent, IonButton, IonImg, IonTitle, IonToolbar,
         IonHeader, IonLabel, IonItem, IonList, IonContent, IonPage, IonGrid, IonRow, IonCol,
-        IonToast  
+        IonToast, IonCardTitle, IonCardSubtitle, IonCardHeader, IonModal, IonIcon
     },
     data: () => ({
         //Iconos
@@ -172,16 +173,21 @@ export default {
         showModalConfirm: false,
     }),
 
-    async created() {
-        await this.cargarDatos();
+    created() {
+        this.isErrorVehiculo = false;
+        this.isLoading = false;
+        this.ShowAlertLimite = false;
+        this.showModalConfirm = false;
+        //await this.cargarDatos();
     },
 
     methods: {
-        async cargarDatos(){
-            var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario');
-            if(!SessionValid) this.$router.push('/login')
+        cargarDatos(){
+            // var SessionValid = this.$cookies.isKey('AccessToken') && this.$cookies.isKey('Usuario');
+            // if(!SessionValid) this.$router.push('/login')
         },
         handleFileChange(event) {
+            event.preventDefault();
             const file = event.target.files[0];
             if (file) {
                 if (file.type.startsWith('image/')) {

@@ -194,8 +194,11 @@ export default {
 
         setTimeout(() => {
           if(response.status == 200 || response.status == 201){
-            this.$cookies.set('AccessToken', response.data.token, { expires: 1 });
-            this.$cookies.set('Usuario', response.data.usuario, { expires: 1 });
+            localStorage.setItem('AccessTokenLocal', response.data.token);
+            localStorage.setItem('UsuarioLocal', response.data.usuario);
+
+            this.$cookies.set('AccessToken', localStorage.getItem('AccessTokenLocal'), { expires: 1 });
+            this.$cookies.set('Usuario', localStorage.getItem('UsuarioLocal'), { expires: 1 });
             this.isValidCorreo = false;
             this.isValidContra = false;
             this.usuario = '';

@@ -212,10 +212,7 @@ export default {
     
         this.origenes = Array.from(origenSet);
         this.destinos = Array.from(destinoSet);
-    
-        // console.log(this.rutasItems)
-        // console.log(this.origenes)
-        // console.log(this.destinos)
+
       }else{
         this.$router.push('/login')
       }

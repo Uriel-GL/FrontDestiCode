@@ -123,7 +123,7 @@
                           </h3>
                           
                         </ion-card-content>
-                        <ion-button @click="VerSolicitantes(ruta.id_Ruta)" expand="full" :disabled="ruta.estatus == false" color="success"  class="btnViaje">
+                        <ion-button @click="VerSolicitantes(ruta.id_Ruta)" expand="full" color="success"  class="btnViaje">
                           Ver Solicitudes
                         </ion-button>
                         <ion-button @click="openModalConfirmDelete(ruta.id_Ruta)" expand="full" class="btnViaje" color="danger" fill="clear">
