@@ -62,13 +62,13 @@
                   <ion-col size="11">
                     <ion-item>
                       <ion-label>Fecha y Hora de <br> salida</ion-label>
-                      <ion-input :value="nuevaRuta.Fecha_Salida" 
-                        class="ion-text-end" id="date" />
+                      <ion-input :value="nuevaRuta.Fecha_Salida" class="ion-text-end" id="date">
                         <ion-popover trigger="date" size="auto">
                           <ion-content>
                             <ion-datetime v-model="nuevaRuta.Fecha_Salida" display-format="DD/MM/YYYY HH:mm"></ion-datetime>
                           </ion-content>
                         </ion-popover>
+                      </ion-input>
                     </ion-item>
                   </ion-col>
 

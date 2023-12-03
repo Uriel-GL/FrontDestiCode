@@ -22,7 +22,7 @@
           :is-open="isErrorLogin"
           color="warning"
           :duration="4000"
-          :icon="wifiOutline"
+          :icon="sadOutline"
         ></ion-toast>
 
         <!-- Totas de error de conexion -->
@@ -71,9 +71,10 @@
                   @ionBlur="onInputPass" 
                   label-placement="floating" 
                   required placeholder="Ingresa tu contraseña" 
-                  fill="outline">
+                  fill="outline"
+                  show-password-toggle="true">
                   </ion-input>
-                  <span v-if="!isValidContra && inputTouchedContra"><ion-text color="danger">Contraseña Inválida</ion-text></span>
+                  <span v-if="contrasena && contrasena.length < 8"><ion-text color="danger">La contraseña debe tener mínimo 8 caracteres.</ion-text></span>
                 </ion-col>
 
                 <ion-col>
@@ -84,7 +85,7 @@
 
                 <ion-col size="12">
                   <ion-button expand="full" color="tertiary" :disabled="disabledButton" shape="round" @click="iniciarSesion">
-                    Inciar Sesión
+                    Iniciar Sesión
                   </ion-button>
                 </ion-col>
 
@@ -112,7 +113,7 @@ import {
   IonGrid, IonRow, IonCol, IonCardTitle, IonCardSubtitle, IonText, IonContent,
 } from '@ionic/vue';
 //Iconos
-import { closeCircleOutline, wifiOutline } from 'ionicons/icons'
+import { closeCircleOutline, wifiOutline, sadOutline } from 'ionicons/icons'
 //Servicios 
 import AuthService from '../Services/AuthService'
 
@@ -128,6 +129,7 @@ export default {
     //Iconos
     closeCircleOutline,
     wifiOutline,
+    sadOutline,
 
     usuario: '',
     contrasena: '',

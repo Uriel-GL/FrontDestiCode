@@ -36,7 +36,7 @@
 
                 <ion-grid class="gridRutas" v-if="TusTickets.length > 0">
                   <ion-row>
-                    <ion-col v-for="ticket in TusTickets" :key="ticket.id_Reservacion">
+                    <ion-col size="12" v-for="ticket in TusTickets" :key="ticket.id_Reservacion">
                       <ion-card>
                         <ion-card-header class="header ion-text-center">
                           <ion-card-title><ion-text class="textHeader">Ticket de Ruta</ion-text></ion-card-title>
@@ -161,7 +161,7 @@
             </div>
 
             <ion-list v-else>
-              <ion-item v-for="user in Reservaciones" :key="user.id_Usuario">
+              <ion-item v-for="(user, index) in Reservaciones" :key="user.id_Usuario">
                 <ion-avatar slot="start">
                   <img src="https://ionicframework.com/docs/img/demos/avatar.svg" alt="">
                 </ion-avatar>
@@ -170,6 +170,10 @@
                   <p>Grupo: {{ user.datosPersonales[0].grupo }}</p>
                   <p>Teléfono: {{ user.datosPersonales[0].telefono }}</p>
                 </ion-label>
+                <ion-button fill="clear" shape="round" 
+                @click="eliminarReservacion(user.reservaciones[index].id_Ruta, user.reservaciones[index].id_Reservacion, user.reservaciones[index].num_Asientos)">
+                  <ion-icon slot="icon-only" :icon="trashOutline" color="danger"></ion-icon>
+                </ion-button>
               </ion-item>
             </ion-list>
           </ion-content>
@@ -278,7 +282,7 @@
           message="Ocurrio un error intenta más tarde."
           :is-open="isErrorData"
           color="danger"
-          :duration="3000"
+          :duration="4000"
           :icon="wifiOutline"
         ></ion-toast>
       </ion-content>
@@ -452,6 +456,37 @@ export default {
         }, 3000);
       }
       catch(error){
+        this.isErrorData = true;
+      }
+    },
+
+    async eliminarReservacion(id_Ruta, id_Reservacion, num_Asientos){
+      try{
+        this.isErrorData = false;
+        this.showModalReservaciones = false;
+        this.isLoading = true;
+        
+        var cancelacion = {
+          Id_Ruta: id_Ruta,
+          Id_Reservacion: id_Reservacion,
+          Num_Lugares_Cancelar: num_Asientos
+        }
+
+        const response = await RutaService.cancelarLugar(cancelacion);
+        setTimeout(() => {
+          if(response.status == 201 || response.status == 200){
+            this.isLoading = false;
+            this.showModalSuccess = true;
+          }else{
+            this.isLoading = false;
+            this.showModalSuccess = false;
+            this.showModalError = true;
+          }
+        }, 3000);
+      }
+      catch(error) {
+        console.log(error)
+        this.isLoading = false;
         this.isErrorData = true;
       }
     },

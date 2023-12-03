@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DestiCode</string>
+    <string name="title_activity_main">DestiCode</string>
+    <string name="package_name">mx.edu.uttt.DestiCode</string>
+    <string name="custom_url_scheme">mx.edu.uttt.DestiCode</string>
+</resources>

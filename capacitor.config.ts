@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'mx.edu.uttt.DestiCode',
   appName: 'DestiCode',
   webDir: 'dist',
   server: {

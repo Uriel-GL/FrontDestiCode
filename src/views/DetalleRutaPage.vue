@@ -72,7 +72,7 @@
                             <br>
                             
                             <div class="btnApartar">
-                                <ion-button @click="showModal = true" id="prepareApartar" expand="full" shape="round" color="success">
+                                <ion-button @click="showModal = true" :disabled="ruta.lugares_Disponibles <= 0" id="prepareApartar" expand="full" shape="round" color="success">
                                     Apartar Lugar
                                 </ion-button>
                             </div>
@@ -225,8 +225,8 @@ export default {
         
     }),
 
-    async created() {
-        await this.cargarDatos()
+    created() {
+        this.cargarDatos()
     },
 
     methods: {
@@ -254,6 +254,7 @@ export default {
                 if(response.status == 201 || response.status == 200){
                     this.isLoading = false
                     this.showModalConfirm = true;
+                    this.$router.push('/reservaciones');
                 }else{
                     this.isLoading = false; 
                     this.showModalError = true;
