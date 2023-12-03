@@ -189,8 +189,8 @@ export default {
         imagenPreview: null,
     }),
 
-    async created() {
-        await this.cargarDatos()
+    created() {
+        this.cargarDatos()
     },
 
     methods: {

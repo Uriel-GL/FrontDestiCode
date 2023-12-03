@@ -26,14 +26,14 @@
                                 </ion-text>
                             </ion-col>
                             <ion-col size="12">
-                                <ion-input label="Contraseña" type="password" v-model="contrasenia" label-placement="floating" fill="outline" color="success"></ion-input>
+                                <ion-input label="Contraseña" type="password" v-model="contrasenia" label-placement="floating" fill="outline" color="success" show-password-toggle="true"></ion-input>
                                 <ion-text color="danger" v-if="contrasenia && contrasenia.length < 8"
                                     style="text-align: center">
                                     La contraseña debe tener mínimo 8 caracteres
                                 </ion-text>
                             </ion-col>
                             <ion-col size="12">
-                                <ion-input label="Confirmación de contraseña" v-model="confirmarContrasenia" type="password" label-placement="floating" fill="outline" color="success"></ion-input>
+                                <ion-input label="Confirmación de contraseña" v-model="confirmarContrasenia" type="password" label-placement="floating" fill="outline" color="success" show-password-toggle="true"></ion-input>
                                 <ion-text color="danger" v-if="confirmarContrasenia && contrasenia !== confirmarContrasenia"
                                     style="text-align: center">
                                     Las contraseñas no coinciden.
@@ -114,14 +114,14 @@
                             </ion-col>
                             <ion-col size="12">
                                 <ion-item>
-                                <ion-label>Fecha de Nacimiento</ion-label>
-                                <ion-input :value="fechaNacimiento" 
-                                    class="ion-text-end" id="date" />
-                                    <ion-popover trigger="date" size="auto">
-                                    <ion-content>
-                                        <ion-datetime v-model="fechaNacimiento" display-format="DD/MM/YYYY"></ion-datetime>
-                                    </ion-content>
-                                    </ion-popover>
+                                    <ion-label>Fecha de  <br> Nacimiento:</ion-label>
+                                    <ion-input :value="fechaNacimiento" class="ion-text-end" id="date">
+                                        <ion-popover trigger="date" size="auto">
+                                        <ion-content>
+                                            <ion-datetime v-model="fechaNacimiento" display-format="DD/MM/YYYY"></ion-datetime>
+                                        </ion-content>
+                                        </ion-popover>
+                                    </ion-input>
                                 </ion-item>
                                 <ion-text color="danger" v-if="fechaNacimiento && fechaNacimiento.length < 5"
                                     style="text-align: center">

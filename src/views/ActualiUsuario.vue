@@ -265,8 +265,8 @@ export default {
     user: {},
   }),
 
-  async created() {
-    await this.cargarDatos();
+  created() {
+    this.cargarDatos();
   },
 
   methods: {

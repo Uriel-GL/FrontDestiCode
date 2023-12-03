@@ -174,8 +174,8 @@ export default {
     rutasFiltradas: []
   }),
 
-  async created() {
-    await this.cargarDatos()
+  created() {
+    this.cargarDatos()
   },
 
   computed: {
